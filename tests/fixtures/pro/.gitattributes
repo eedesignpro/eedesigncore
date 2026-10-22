@@ -1,0 +1,4 @@
+# These files are byte-identity oracles. Git must store and restore their exact
+# bytes, including line endings, on every platform.
+*.kicad_pro -text
+*.kicad_prl -text

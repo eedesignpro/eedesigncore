@@ -1,0 +1,421 @@
+{
+  "source": "KiCad NET_SETTINGS.SetNetclassPatternAssignment and GetEffectiveNetClass.ContainsNetclassWithName",
+  "version": "10.0.4",
+  "names": [
+    "",
+    "VCC",
+    "vcc",
+    "VCC_A",
+    "GND",
+    "PREFIX_GND",
+    "VCC_SUFFIX",
+    "D7",
+    "D17",
+    "SIGxA",
+    "SIG.[AB]",
+    "[",
+    "123",
+    "/VCC+",
+    "A",
+    "１２",
+    "NET\nNAME",
+    "VCC\n",
+    "AB",
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "D03",
+    "CLK",
+    "BUS.CLK",
+    "~{D0}",
+    "~{D1}",
+    "D1+",
+    "D2+",
+    "D3+",
+    "D X0",
+    "D X1",
+    "A+B",
+    "/Input/SENSE",
+    "/Other/SENSE",
+    "I^{2}C0",
+    "I^{2}C1",
+    "AA",
+    "B",
+    "aaa"
+  ],
+  "patterns": [
+    {
+      "pattern": "*",
+      "matched_names": [
+        "VCC",
+        "vcc",
+        "VCC_A",
+        "GND",
+        "PREFIX_GND",
+        "VCC_SUFFIX",
+        "D7",
+        "D17",
+        "SIGxA",
+        "SIG.[AB]",
+        "[",
+        "123",
+        "/VCC+",
+        "A",
+        "１２",
+        "NET\nNAME",
+        "VCC\n",
+        "AB",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D03",
+        "CLK",
+        "BUS.CLK",
+        "~{D0}",
+        "~{D1}",
+        "D1+",
+        "D2+",
+        "D3+",
+        "D X0",
+        "D X1",
+        "A+B",
+        "/Input/SENSE",
+        "/Other/SENSE",
+        "I^{2}C0",
+        "I^{2}C1",
+        "AA",
+        "B",
+        "aaa"
+      ]
+    },
+    {
+      "pattern": "VCC",
+      "matched_names": [
+        "VCC",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "V*",
+      "matched_names": [
+        "VCC",
+        "VCC_A",
+        "VCC_SUFFIX",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "D?",
+      "matched_names": [
+        "D7",
+        "D0",
+        "D1",
+        "D2",
+        "D3"
+      ]
+    },
+    {
+      "pattern": "SIG.[AB]",
+      "matched_names": [
+        "SIGxA",
+        "SIG.[AB]"
+      ]
+    },
+    {
+      "pattern": "[",
+      "matched_names": [
+        "["
+      ]
+    },
+    {
+      "pattern": "(VCC|GND)",
+      "matched_names": [
+        "VCC",
+        "GND",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "VCC|GND",
+      "matched_names": [
+        "VCC",
+        "VCC_A",
+        "GND",
+        "VCC_SUFFIX",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "[[:digit:]]+",
+      "matched_names": [
+        "123"
+      ]
+    },
+    {
+      "pattern": "\\Q/VCC+\\E",
+      "matched_names": [
+        "/VCC+"
+      ]
+    },
+    {
+      "pattern": "\\u0041",
+      "matched_names": [
+        "A"
+      ]
+    },
+    {
+      "pattern": "\\d+",
+      "matched_names": [
+        "123"
+      ]
+    },
+    {
+      "pattern": "",
+      "matched_names": []
+    },
+    {
+      "pattern": "A\\KB",
+      "matched_names": []
+    },
+    {
+      "pattern": "D[03..01]",
+      "matched_names": [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    },
+    {
+      "pattern": "{D[0..1] CLK}",
+      "matched_names": [
+        "D0",
+        "D1",
+        "CLK"
+      ]
+    },
+    {
+      "pattern": "BUS{D[0..1] CLK}",
+      "matched_names": [
+        "D0",
+        "D1",
+        "CLK"
+      ]
+    },
+    {
+      "pattern": "D_{[1..2]}",
+      "matched_names": [
+        "D1",
+        "D2"
+      ]
+    },
+    {
+      "pattern": "~{D[0..1]}",
+      "matched_names": [
+        "~{D0}",
+        "~{D1}"
+      ]
+    },
+    {
+      "pattern": "D[1..2]+",
+      "matched_names": [
+        "D1",
+        "D2",
+        "D1+",
+        "D2+"
+      ]
+    },
+    {
+      "pattern": "D[3..3]",
+      "matched_names": [
+        "D3"
+      ]
+    },
+    {
+      "pattern": "D[3..5",
+      "matched_names": [
+        "D0",
+        "D1",
+        "D2",
+        "D3"
+      ]
+    },
+    {
+      "pattern": "\"D X\"[0..1]",
+      "matched_names": [
+        "D X0",
+        "D X1"
+      ]
+    },
+    {
+      "pattern": "{D\\ X[0..1] CLK}",
+      "matched_names": [
+        "CLK",
+        "D X0",
+        "D X1"
+      ]
+    },
+    {
+      "pattern": "A+B",
+      "matched_names": [
+        "AB",
+        "A+B"
+      ]
+    },
+    {
+      "pattern": "(?i)VCC",
+      "matched_names": [
+        "VCC",
+        "vcc",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "^VCC$",
+      "matched_names": [
+        "VCC",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "/Input/*",
+      "matched_names": [
+        "/Input/SENSE"
+      ]
+    },
+    {
+      "pattern": "*/SENSE",
+      "matched_names": [
+        "/Input/SENSE",
+        "/Other/SENSE"
+      ]
+    },
+    {
+      "pattern": "\\w+",
+      "matched_names": [
+        "VCC",
+        "vcc",
+        "VCC_A",
+        "GND",
+        "PREFIX_GND",
+        "VCC_SUFFIX",
+        "D7",
+        "D17",
+        "SIGxA",
+        "123",
+        "A",
+        "VCC\n",
+        "AB",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D03",
+        "CLK",
+        "AA",
+        "B",
+        "aaa"
+      ]
+    },
+    {
+      "pattern": "\\x41",
+      "matched_names": [
+        "A"
+      ]
+    },
+    {
+      "pattern": "\\x{41}",
+      "matched_names": []
+    },
+    {
+      "pattern": "{A,B}",
+      "matched_names": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "pattern": "I^{2}C[0..1]",
+      "matched_names": [
+        "I^{2}C0",
+        "I^{2}C1"
+      ]
+    },
+    {
+      "pattern": "A{2}",
+      "matched_names": []
+    },
+    {
+      "pattern": "^A|B$",
+      "matched_names": [
+        "A",
+        "AB",
+        "A+B",
+        "AA",
+        "B"
+      ]
+    },
+    {
+      "pattern": "[A-Z]+",
+      "matched_names": [
+        "VCC",
+        "GND",
+        "A",
+        "VCC\n",
+        "AB",
+        "CLK",
+        "AA",
+        "B"
+      ]
+    },
+    {
+      "pattern": "a{1,3}",
+      "matched_names": []
+    },
+    {
+      "pattern": "(?=V)VCC",
+      "matched_names": [
+        "VCC",
+        "VCC\n"
+      ]
+    },
+    {
+      "pattern": "[^A]+",
+      "matched_names": [
+        "VCC",
+        "vcc",
+        "GND",
+        "PREFIX_GND",
+        "VCC_SUFFIX",
+        "D7",
+        "D17",
+        "[",
+        "123",
+        "/VCC+",
+        "１２",
+        "VCC\n",
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D03",
+        "CLK",
+        "BUS.CLK",
+        "~{D0}",
+        "~{D1}",
+        "D1+",
+        "D2+",
+        "D3+",
+        "D X0",
+        "D X1",
+        "/Input/SENSE",
+        "/Other/SENSE",
+        "I^{2}C0",
+        "I^{2}C1",
+        "B",
+        "aaa"
+      ]
+    }
+  ]
+}

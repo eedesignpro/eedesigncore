@@ -1,0 +1,661 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "eec35174-a2bd-4ffa-b564-2c762ba14c5e")
+	(lib_symbols
+		(symbol "Probe:Gate"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(symbol "Gate_1_1"
+				(rectangle
+					(start -2 2)
+					(end 2 -2)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(text "A"
+					(at 0 1 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left top)
+					)
+				)
+				(text "V"
+					(at 1 0 900)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify right bottom)
+					)
+				)
+				(pin input inverted_clock
+					(at -4.54 0 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "SCHEMATIC\nSECOND"
+		(exclude_from_sim no)
+		(at 90 10 0)
+		(uuid "251c12a2-3e4a-4ba5-8e6f-0be78600e9be")
+	)
+	(junction
+		(at 30 10)
+		(diameter 0.9144)
+		(color 0 0 0 0)
+		(uuid "3660fc50-4053-43b3-bb58-6d59ec1429e3")
+	)
+	(no_connect
+		(at 70 10)
+		(uuid "29ba2035-3d0a-4c75-baa7-ff3c5441573a")
+	)
+	(bus_entry
+		(at 45 10)
+		(size 5 5)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "17d76d27-d1b0-4f0f-9b8e-4ea102f1d054")
+	)
+	(wire
+		(pts
+			(xy 15 10) (xy 45 10)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2e11996-1967-4b51-927e-5f977ea04cdd")
+	)
+	(bus
+		(pts
+			(xy 50 10) (xy 65 10)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d777cb13-ac0d-4272-b516-65b28f186301")
+	)
+	(label "NET"
+		(at 100 125 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "46c5e3a2-3e2d-4acf-9a9f-a369dbb0dc72")
+	)
+	(label "NET"
+		(at 30 125 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "54bdef2c-aa0a-49ab-acee-f80c577453ed")
+	)
+	(label "NET"
+		(at 135 125 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "84986276-f1b9-4e12-b9ba-2cadce578a87")
+	)
+	(label "NET"
+		(at 65 125 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e42446d3-9749-4a3c-87ff-4e13afbe83c4")
+	)
+	(global_label "NET"
+		(shape input)
+		(at 30 145 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5cc28cff-31b7-4d34-81b0-40d737a1ab93")
+	)
+	(global_label "NET"
+		(shape input)
+		(at 100 145 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5db408ff-eaf3-499f-8dcc-5d6b438ee6d5")
+	)
+	(global_label "NET"
+		(shape input)
+		(at 65 145 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "cc03a11b-c7a5-4975-b9f2-2a2700b3bc15")
+	)
+	(global_label "NET"
+		(shape input)
+		(at 135 145 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "de65dead-dbe4-44bc-91f1-5b14e319d129")
+	)
+	(hierarchical_label "NET"
+		(shape input)
+		(at 65 165 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0c30d0e3-6d36-42a0-99f0-e13c14d3518b")
+	)
+	(hierarchical_label "NET"
+		(shape input)
+		(at 135 165 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "57e89ec6-a167-40d3-8afa-04ceba83c4d3")
+	)
+	(hierarchical_label "NET"
+		(shape input)
+		(at 30 165 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d084c7aa-0ac5-4436-933a-a553df08cf50")
+	)
+	(hierarchical_label "NET"
+		(shape input)
+		(at 100 165 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f3473a7d-30de-49b8-a534-47c4c914ec23")
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 65 30 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "030a1150-7283-419c-9698-b53c8a000cf5")
+		(property "Reference" "U2"
+			(at 65 40 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 100 30 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "11d66197-accb-44bd-8de2-6293502b84e2")
+		(property "Reference" "U3"
+			(at 100 40 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 30 90 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "25e1404b-8334-4aae-88f2-a8fcd37a6013")
+		(property "Reference" "U9"
+			(at 30 100 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 65 90 90)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "3a0534ee-494a-4f1a-a40f-47b598e4e559")
+		(property "Reference" "U10"
+			(at 65 100 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 135 30 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "3f1713e7-8e4d-41a4-af1c-9c3f6fce9993")
+		(property "Reference" "U4"
+			(at 135 40 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 100 90 180)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "412097de-9f7c-4673-9446-48a785152997")
+		(property "Reference" "U11"
+			(at 100 100 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 30 60 0)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "5a41b9f1-e0d9-4f76-a806-c690db24bdc3")
+		(property "Reference" "U5"
+			(at 30 70 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 135 90 270)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "7bbe7753-38c4-4948-ade1-4c875e25c4cc")
+		(property "Reference" "U12"
+			(at 135 100 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 65 60 90)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "9008cb32-0501-4a7b-8e74-4457fab09d4b")
+		(property "Reference" "U6"
+			(at 65 70 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 100 60 180)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "c2fdbf16-6782-4fb4-aca6-bb97dc8da62c")
+		(property "Reference" "U7"
+			(at 100 70 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 135 60 270)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "d635c0d2-d4f5-4569-bf41-e63f6f59a462")
+		(property "Reference" "U8"
+			(at 135 70 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Probe:Gate")
+		(at 30 30 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "dfd98fbc-94d0-4c31-b1f3-a444336c2d64")
+		(property "Reference" "U1"
+			(at 30 40 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "probe"
+				(path "/eec35174-a2bd-4ffa-b564-2c762ba14c5e"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet
+		(at 175 25)
+		(size 30 30)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp yes)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b7fe3451-f6ba-4ff1-853c-370ec83336d9")
+		(property "Sheetname" "Child"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Sheetfile" "child.kicad_sch"
+			(at 0 0 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "LEFT" input
+			(at 175 40 180)
+			(uuid "4958df1d-8b86-4040-b819-31cb7912bd6d")
+		)
+		(pin "RIGHT" output
+			(at 205 40 0)
+			(uuid "75c8e861-f087-40b2-8b19-c16bd82a1faa")
+		)
+		(pin "TOP" input
+			(at 190 25 90)
+			(uuid "96b34827-90da-415c-9e5f-7317a35c8ddd")
+		)
+		(pin "BOTTOM" output
+			(at 190 55 270)
+			(uuid "cc2207f4-28bb-4bcd-91bc-56251e50f7e0")
+		)
+	)
+)

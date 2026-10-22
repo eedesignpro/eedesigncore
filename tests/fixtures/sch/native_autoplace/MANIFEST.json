@@ -1,0 +1,6 @@
+{
+  "source": "User saved collision-checked demo after native KiCad O field placement, 2026-10-16.",
+  "extraction": "Only embedded symbol definitions and placed symbols retained. Field values and placement unchanged.",
+  "purpose": "Native reference, capacitor, resistor, and LED field anchors and justification.",
+  "page_reference_source": "User saved placement-demo and interface in collision-checked-demo-native-field-gaps after native KiCad placement, 2026-10-16. Only labels extracted. Local default font: Cascadia Mono."
+}

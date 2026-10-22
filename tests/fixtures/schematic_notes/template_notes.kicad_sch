@@ -1,0 +1,72 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(lib_symbols)
+	(text_box "${ERC_WARNING SCHEMATIC NOTE ############################## SCHEMATIC NOTE}SCHEMATIC NOTE:\n\n<<TEMPLATE>>\nCopy-paste these blocks and edit the body text to add notes regarding the electrical circuit.\n\nDo not modify the first line, that is used to flag an ERC item for easy human and CI-CD checking.\n\nDelete this template before release."
+		(exclude_from_sim no)
+		(at 53.34 -33.02 0)
+		(size 49.53 30.48)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+			(color 0 0 90 1)
+		)
+		(fill
+			(type color)
+			(color 177 177 220 0.8)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(color 0 0 90 1)
+			)
+		)
+		(uuid "542ee6b0-55ec-4cf3-a0e7-36fac57dde3d")
+	)
+	(text_box "${ERC_ERROR TODO ############################## TODO}TODO:\n\n<<TEMPLATE>>\nCopy-paste these blocks and edit the body text to add TODO items.\n\n\nDo not modify the first line, that is used to flag an ERC item for easy human and CI-CD checking.\n\nDelete this template before release."
+		(exclude_from_sim no)
+		(at 106.68 -33.02 0)
+		(size 50.8 30.48)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+			(color 90 0 0 1)
+		)
+		(fill
+			(type color)
+			(color 220 177 177 0.8)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(color 90 0 0 1)
+			)
+		)
+		(uuid "7b124ab6-9334-4232-b3f5-8cc2fc3625a3")
+	)
+	(text_box "${ERC_WARNING LAYOUT NOTE ############################## LAYOUT NOTE}LAYOUT NOTE:\n\n<<TEMPLATE>>\nCopy-paste these blocks and edit the body text to add notes regarding the PCB layout.\n\nDo not modify the first line, that is used to flag an ERC item for easy human and CI-CD checking.\n\nDelete this template before release."
+		(exclude_from_sim no)
+		(at 0 -33.02 0)
+		(size 49.53 30.48)
+		(margins 0.9525 0.9525 0.9525 0.9525)
+		(stroke
+			(width 0)
+			(type solid)
+			(color 0 90 0 1)
+		)
+		(fill
+			(type color)
+			(color 177 220 177 0.8)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(color 0 90 0 1)
+			)
+		)
+		(uuid "d204f169-0340-405d-9d38-fab2b8bb2ad2")
+	)
+)

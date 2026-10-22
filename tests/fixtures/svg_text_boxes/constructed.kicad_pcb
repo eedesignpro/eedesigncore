@@ -1,0 +1,76 @@
+(kicad_pcb
+	(version 20260206)
+	(generator "pcbnew")
+	(layers
+		(0 "F.Cu" signal)
+		(2 "B.Cu" signal)
+		(37 "F.SilkS" user)
+	)
+	(footprint "Probe"
+		(layer "F.Cu")
+		(at 150 180 90)
+		(duplicate_pad_numbers_are_jumpers no)
+		(fp_text_box "ABC DEF GHI JKL"
+			(start 0 0)
+			(end 12 10)
+			(margins 0 0 0 0)
+			(layer "F.SilkS")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+				(justify left top)
+			)
+			(border no)
+			(stroke
+				(width 0)
+				(type default)
+			)
+			(knockout no)
+		)
+		(embedded_fonts no)
+	)
+	(gr_text_box "ABC DEF GHI JKL\nXYZ"
+		(pts
+			(xy 150 20) (xy 159.8298245 13.11708276) (xy 165.5655889 21.30860321) (xy 155.7357644 28.19152044)
+		)
+		(margins 0.2 0.3 0.4 0.5)
+		(angle 35)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left top)
+		)
+		(border no)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(knockout no)
+	)
+	(gr_text_box "ABC DEF GHI JKL\nXYZ"
+		(start 30 20)
+		(end 42 30)
+		(margins 0.2 0.3 0.4 0.5)
+		(angle 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left top)
+		)
+		(border no)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(knockout no)
+	)
+	(embedded_fonts no)
+)

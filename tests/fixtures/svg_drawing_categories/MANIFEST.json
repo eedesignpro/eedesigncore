@@ -1,0 +1,19 @@
+{
+  "kind": "CONSTRUCTED",
+  "kicad_source_tag": "10.0.3",
+  "oracle_version": "10.0.4",
+  "purpose": "Tables, directive flags, text markup, multiline text, stacked pins, do-not-populate marks, PCB curves, targets, barcodes, and knockout text.",
+  "source_projects_modified": false,
+  "files": {
+    "board.kicad_pcb": "b28a06043972118a4e0738a6add2e1880e4afb77e6beb2525df2c8ec6f6e2151",
+    "board.svg": "9c30941eb3490ea55bb9c92ad12ced7cd3541f5ebb25a2066fb3c4ee6057ea55",
+    "do-not-populate.kicad_sch": "0b23f523711928f6f995f704e4778922e26bb55681756baf8bb46671ef60c522",
+    "do-not-populate.svg": "53b41e2010ba827a13e07066783ee62106eff2ebb7338e41abc99a56efb4c7b0",
+    "labels.kicad_sch": "108ba5c99617928492061c3d9d97b307b10bb67db6b5daa1f9f40c63454b7420",
+    "labels.svg": "83f21ced697a17778a24eb96a219e36312ceb7808de66c607d32275ff9921382",
+    "multiline.kicad_sch": "4e9b77d4a7f169e2776a3f573e1d4cf8d5c05bffc9f48d37f4e9c8d9a2237bbe",
+    "multiline.svg": "db69b190aed17f8576be2afc38ee53e3d58cf6c905991151b0deb9eb7e91cee3",
+    "schematic.kicad_sch": "d23cf65df07cd50789f65411452213502170e1762bb8c829e87cf6887197280a",
+    "schematic.svg": "b3eec5120bd42ac0ea4f72df729ca6f6822a08e1f5555863d1e9663996bd3dff"
+  }
+}

@@ -1,0 +1,136 @@
+"""PCB-family shared models (board + footprint), tiered per arch-plan §4.
+
+- ``shapes`` -- Tier C shared-child graphic payloads (Pcb* shapes/text/group, PcbPoint).
+- ``board_items`` -- Tier C shared-child board items (Zone/Dimension/Table/Image/Barcode).
+- ``footprint_scoped`` -- Tier B footprint-scoped models (Stackup/Variant/Padstack/units).
+
+``common/`` never imports a format sub-package (ADR-015); formats import from here.
+"""
+
+from eedesigncore.common.pcb_family.board_items import (
+    ArrowDirection,
+    Barcode,
+    BarcodeEcc,
+    BarcodeKind,
+    Dimension,
+    DimensionFormat,
+    DimensionStyle,
+    DimensionText,
+    DimensionType,
+    ReferenceImage,
+    Table,
+    TableBorder,
+    TableCell,
+    TableSeparators,
+    Zone,
+    ZoneFill,
+    ZoneFilledPolygon,
+    ZoneKeepout,
+    ZoneLayerProperty,
+    ZoneOutlinePolygon,
+    ZonePlacement,
+)
+from eedesigncore.common.pcb_family.enums import (
+    ChamferPosition,
+    CustomAnchor,
+    CustomShapeClearance,
+    PadProperty,
+    PadShape,
+    PadType,
+)
+from eedesigncore.common.pcb_family.fills import (
+    extract_fills,
+    flatten_fills,
+    replace_fills,
+)
+from eedesigncore.common.pcb_family.footprint_scoped import (
+    BackdrillInfo,
+    ComponentClasses,
+    FootprintGateUnit,
+    FootprintUnitInfo,
+    JumperPadGroups,
+    Padstack,
+    PadstackLayer,
+    PadstackMode,
+    PostMachining,
+    PostMachiningMode,
+    Stackup,
+    StackupLayer,
+    Variant,
+    VariantField,
+)
+from eedesigncore.common.pcb_family.shapes import (
+    PcbArc,
+    PcbCircle,
+    PcbCurve,
+    PcbDrawItem,
+    PcbGroup,
+    PcbLine,
+    PcbPoint,
+    PcbPoly,
+    PcbRect,
+    PcbText,
+    PcbTextBox,
+)
+
+__all__ = [
+    "extract_fills",
+    "flatten_fills",
+    "replace_fills",
+    # enums (Tier C shared-child)
+    "ChamferPosition",
+    "CustomAnchor",
+    "CustomShapeClearance",
+    "PadProperty",
+    "PadShape",
+    "PadType",
+    # shapes (Tier C shared-child)
+    "PcbPoint",
+    "PcbText",
+    "PcbLine",
+    "PcbRect",
+    "PcbCircle",
+    "PcbArc",
+    "PcbPoly",
+    "PcbCurve",
+    "PcbTextBox",
+    "PcbDrawItem",
+    "PcbGroup",
+    # board_items (Tier C shared-child)
+    "BarcodeKind",
+    "BarcodeEcc",
+    "DimensionType",
+    "ArrowDirection",
+    "ReferenceImage",
+    "ZoneKeepout",
+    "ZonePlacement",
+    "ZoneFill",
+    "ZoneLayerProperty",
+    "ZoneFilledPolygon",
+    "ZoneOutlinePolygon",
+    "Zone",
+    "Barcode",
+    "TableCell",
+    "TableBorder",
+    "TableSeparators",
+    "Table",
+    "DimensionFormat",
+    "DimensionStyle",
+    "DimensionText",
+    "Dimension",
+    # footprint_scoped (Tier B)
+    "PadstackMode",
+    "PostMachiningMode",
+    "PostMachining",
+    "PadstackLayer",
+    "Padstack",
+    "BackdrillInfo",
+    "VariantField",
+    "Variant",
+    "ComponentClasses",
+    "FootprintGateUnit",
+    "FootprintUnitInfo",
+    "StackupLayer",
+    "Stackup",
+    "JumperPadGroups",
+]

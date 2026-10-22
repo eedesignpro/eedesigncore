@@ -1,0 +1,9 @@
+{
+  "meta": {
+    "filename": "hand_edited_ascii_escapes.kicad_pro",
+    "version": 3
+  },
+  "text_variables": {
+    "PCB_STACKUP": "minimum Tg 170\u00b0C."
+  }
+}

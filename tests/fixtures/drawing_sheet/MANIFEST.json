@@ -1,0 +1,7 @@
+{
+  "classification": "CONSTRUCTED",
+  "source": "Generated drawing-sheet templates accepted by KiCad CLI 10.0.4",
+  "geometry": "Three repeated lines, one lower-right rectangle, one rotated filled triangle",
+  "text": "Title, page counts, alphabetic repeats, first-page filter, expression",
+  "comparison": "Native SVG vertices rounded to four decimal places and SVG text content"
+}

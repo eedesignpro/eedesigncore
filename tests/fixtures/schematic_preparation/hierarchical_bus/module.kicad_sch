@@ -1,0 +1,310 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "720456be-d8ba-52a0-a52b-40bc32b76d1a")
+	(paper "A4")
+	(lib_symbols
+		(symbol "Test:Dual"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Dual_0_1"
+				(rectangle
+					(start -2 2)
+					(end 2 -2)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Dual_1_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "Dual_2_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(junction
+		(at 65 50)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b575e9d2-389a-5711-838f-740ef7654320")
+	)
+	(bus_entry
+		(at 75 50)
+		(size 5 5)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4200e546-da77-5162-9240-b103195caf65")
+	)
+	(bus_entry
+		(at 75 70)
+		(size 5 5)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bdab1c80-da9f-5121-b714-ec2ff23aa2a9")
+	)
+	(wire
+		(pts
+			(xy 65 50) (xy 75 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1002fde2-4971-59d8-b431-a2ff73af1ab1")
+	)
+	(bus
+		(pts
+			(xy 80 40) (xy 80 80)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1f44d2a7-2a47-5195-810f-8eaed558211d")
+	)
+	(wire
+		(pts
+			(xy 30 70) (xy 44.92 70)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "25a3a54e-9ecb-5839-8d37-1cf835e53812")
+	)
+	(wire
+		(pts
+			(xy 30 50) (xy 44.92 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "39fc07b0-5976-55c4-a622-f01fb1f4ade6")
+	)
+	(wire
+		(pts
+			(xy 55.08 70) (xy 75 70)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e6855278-28a8-5ae5-8ea9-0a076ba1deab")
+	)
+	(wire
+		(pts
+			(xy 55.08 50) (xy 65 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4f0b2aa-4453-5ade-bd86-e3c092c60418")
+	)
+	(label "DATA1"
+		(at 75 50 0)
+		(uuid "2fff38be-a1d5-54ca-84b8-1678a7de56d2")
+	)
+	(label "DATA0"
+		(at 75 70 0)
+		(uuid "50808360-b2ec-5fcb-84c3-4811901bcf13")
+	)
+	(label "LOCAL"
+		(at 65 50 0)
+		(uuid "c0bbd5c6-394c-58b1-b782-61457ac73fb6")
+	)
+	(global_label "GND"
+		(shape input)
+		(at 30 70 0)
+		(uuid "4653a2e3-fda1-5595-b3fd-a79ee67bb3ee")
+	)
+	(hierarchical_label "DATA[0..1]"
+		(shape input)
+		(at 80 40 0)
+		(uuid "225db718-2914-5a18-9923-5390f272f2b5")
+	)
+	(hierarchical_label "LINK"
+		(shape input)
+		(at 30 50 0)
+		(uuid "49049445-b62f-5a18-8487-201a7a424bcc")
+	)
+	(symbol
+		(lib_id "Test:Dual")
+		(at 50 70 0)
+		(unit 2)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "274783f7-6cd5-51e5-b411-d87e9a73b6b4")
+		(property "Reference" "U1"
+			(at 50 66 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Value" "Dual"
+			(at 50 70 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "3"
+			(uuid "8be9c9d1-bb35-579e-bb1e-2b159015b83c")
+		)
+		(pin "4"
+			(uuid "8ae10432-1253-5dc1-99f9-fabcced74332")
+		)
+		(instances
+			(project "root"
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c/12a1ef6e-f83c-545e-86be-4cafaf8899e5"
+					(reference "U2")
+					(unit 2)
+				)
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c/43c6b4eb-5c42-5bf0-a303-6f1178b56267"
+					(reference "U1")
+					(unit 2)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Test:Dual")
+		(at 50 50 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ad42e315-100a-53d3-9ff7-7aed4ccde85d")
+		(property "Reference" "U1"
+			(at 50 46 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Value" "Dual"
+			(at 50 50 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "1"
+			(uuid "fb6b86c7-ae79-5992-a02b-eba848d76aa6")
+		)
+		(pin "2"
+			(uuid "a8ea5fde-eda4-513b-a8f2-509a4a54d9e5")
+		)
+		(instances
+			(project "root"
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c/12a1ef6e-f83c-545e-86be-4cafaf8899e5"
+					(reference "U2")
+					(unit 1)
+				)
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c/43c6b4eb-5c42-5bf0-a303-6f1178b56267"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

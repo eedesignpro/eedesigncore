@@ -1,0 +1,13 @@
+# Exact pins for CI and the project virtual environment (operator ruling 2026-07-28).
+# pyproject.toml declares compatible ranges because this is a library.
+# Install with: pip install -e ".[dev]" -c constraints.txt
+pydantic==2.13.4
+zstandard==0.25.0
+hatchling==1.31.0
+pyclipper==1.4.0
+pcre2==0.7.1
+
+zxing-cpp==3.1.1
+
+fonttools==4.66.0
+uharfbuzz==0.56.2

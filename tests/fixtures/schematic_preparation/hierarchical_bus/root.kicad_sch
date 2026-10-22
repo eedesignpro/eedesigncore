@@ -1,0 +1,291 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "c6f74f02-8864-5cca-9d57-650a67436d7c")
+	(paper "A4")
+	(lib_symbols
+		(symbol "Test:Dual"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Dual_0_1"
+				(rectangle
+					(start -2 2)
+					(end 2 -2)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Dual_1_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "Dual_2_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(wire
+		(pts
+			(xy 55.08 50) (xy 70 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "35503bc4-1d1c-586e-901e-e04b04ca7593")
+	)
+	(bus
+		(pts
+			(xy 110 40) (xy 110 90)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c96309b-aee2-565a-a57b-7adbd61c7cff")
+	)
+	(wire
+		(pts
+			(xy 44.92 50) (xy 100 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8782c744-4af9-589c-8697-2539fafdc883")
+	)
+	(wire
+		(pts
+			(xy 70 50) (xy 70 100)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8a3658cb-c9bb-5706-ad6b-ca623f9c6ea7")
+	)
+	(wire
+		(pts
+			(xy 70 100) (xy 100 100)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e582a338-766f-534b-95da-92cba276afb3")
+	)
+	(symbol
+		(lib_id "Test:Dual")
+		(at 50 50 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a59b1aa3-9fe7-5731-ad9b-fba7b861f1b4")
+		(property "Reference" "U3"
+			(at 50 46 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Value" "Dual"
+			(at 50 50 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "1"
+			(uuid "555ba659-7498-550d-a686-d100cf7c2bef")
+		)
+		(pin "2"
+			(uuid "ec7fe0bd-316f-5524-b5e7-9855521947c6")
+		)
+		(instances
+			(project "root"
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c"
+					(reference "U3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet
+		(at 100 90)
+		(size 30 20)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "12a1ef6e-f83c-545e-86be-4cafaf8899e5")
+		(property "Sheetname" "moduleB"
+			(at 100 88 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Sheetfile" "module.kicad_sch"
+			(at 100 113 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "LINK" input
+			(at 100 100 180)
+			(uuid "3849e237-743f-5d25-801e-0794a5eabdbe")
+		)
+		(pin "DATA[0..1]" input
+			(at 110 90 90)
+			(uuid "a536b2c2-727c-5020-8ebb-c91a87c075ae")
+		)
+		(instances
+			(project "root"
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 100 40)
+		(size 30 20)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "43c6b4eb-5c42-5bf0-a303-6f1178b56267")
+		(property "Sheetname" "moduleA"
+			(at 100 38 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(property "Sheetfile" "module.kicad_sch"
+			(at 100 63 0)
+			(show_name no)
+			(do_not_autoplace no)
+		)
+		(pin "LINK" input
+			(at 100 50 180)
+			(uuid "c9a67ca3-d11a-5e49-92cb-00c67579ce68")
+		)
+		(pin "DATA[0..1]" input
+			(at 110 40 90)
+			(uuid "b01b69a0-ee71-5f4f-a6f2-2465d95903c4")
+		)
+		(instances
+			(project "root"
+				(path "/c6f74f02-8864-5cca-9d57-650a67436d7c"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)

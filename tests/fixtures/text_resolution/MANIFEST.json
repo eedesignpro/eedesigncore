@@ -1,0 +1,9 @@
+{
+  "classification": "CONSTRUCTED",
+  "source": "Generated schematic text exported with kicad-cli 10.0.4",
+  "target_source": "KiCad 10.0.3",
+  "command": "kicad-cli sch export svg --exclude-drawing-sheet --no-background-color --define-var KEY=A --define-var A=@{1+2} --define-var FIELD5=value",
+  "case_count": 62,
+  "comparison": "SVG text element content, exact strings",
+  "notes": "Expressions are independent. No project boards were changed."
+}

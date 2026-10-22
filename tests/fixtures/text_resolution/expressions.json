@@ -1,0 +1,269 @@
+{
+  "variables": {
+    "KEY": "A",
+    "A": "@{1+2}",
+    "FIELD5": "value"
+  },
+  "cases": [
+    {
+      "raw": "@{2+3*4}",
+      "expected": "14"
+    },
+    {
+      "raw": "@{-2^2}",
+      "expected": "-4"
+    },
+    {
+      "raw": "@{2^3^2}",
+      "expected": "512"
+    },
+    {
+      "raw": "@{2^-2}",
+      "expected": "0.25"
+    },
+    {
+      "raw": "@{4k7 + 1k}",
+      "expected": "48000"
+    },
+    {
+      "raw": "@{1mm + 2cm}",
+      "expected": "21"
+    },
+    {
+      "raw": "@{1in / 1mil}",
+      "expected": "1000"
+    },
+    {
+      "raw": "@{1e-3 * 1M}",
+      "expected": "1000"
+    },
+    {
+      "raw": "@{-5 % 3}",
+      "expected": "-2"
+    },
+    {
+      "raw": "@{3>=2}",
+      "expected": "1"
+    },
+    {
+      "raw": "@{\"x\" + 2}",
+      "expected": "x2"
+    },
+    {
+      "raw": "@{\"1\" == \"01\"}",
+      "expected": "0"
+    },
+    {
+      "raw": "@{\"1\" == 1}",
+      "expected": "1"
+    },
+    {
+      "raw": "@{if(1,\"yes\",\"no\")}",
+      "expected": "yes"
+    },
+    {
+      "raw": "@{concat(\"a\",2,\"c\")}",
+      "expected": "a2c"
+    },
+    {
+      "raw": "@{upper(\"abc\")}",
+      "expected": "ABC"
+    },
+    {
+      "raw": "@{lower(\"ABC\")}",
+      "expected": "abc"
+    },
+    {
+      "raw": "@{beforefirst(\"ab:cd:ef\", \":\")}",
+      "expected": "ab"
+    },
+    {
+      "raw": "@{beforelast(\"ab:cd:ef\", \":\")}",
+      "expected": "ab:cd"
+    },
+    {
+      "raw": "@{afterfirst(\"ab:cd:ef\", \":\")}",
+      "expected": "cd:ef"
+    },
+    {
+      "raw": "@{afterlast(\"ab:cd:ef\", \":\")}",
+      "expected": "ef"
+    },
+    {
+      "raw": "@{round(-2.5)}",
+      "expected": "-3"
+    },
+    {
+      "raw": "@{round(12.345,2)}",
+      "expected": "12.35"
+    },
+    {
+      "raw": "@{sum(1,2,3)}",
+      "expected": "6"
+    },
+    {
+      "raw": "@{avg(2,4)}",
+      "expected": "3"
+    },
+    {
+      "raw": "@{min(3,2,4)}",
+      "expected": "2"
+    },
+    {
+      "raw": "@{max(3,2,4)}",
+      "expected": "4"
+    },
+    {
+      "raw": "@{abs(-5)}",
+      "expected": "5"
+    },
+    {
+      "raw": "@{sqrt(9)}",
+      "expected": "3"
+    },
+    {
+      "raw": "@{pow(3,2)}",
+      "expected": "9"
+    },
+    {
+      "raw": "@{floor(1.8)}",
+      "expected": "1"
+    },
+    {
+      "raw": "@{ceil(1.2)}",
+      "expected": "2"
+    },
+    {
+      "raw": "@{shunt(100,100)}",
+      "expected": "50"
+    },
+    {
+      "raw": "@{db(100)}",
+      "expected": "20"
+    },
+    {
+      "raw": "@{dbv(100)}",
+      "expected": "40"
+    },
+    {
+      "raw": "@{fromdb(20)}",
+      "expected": "100"
+    },
+    {
+      "raw": "@{fromdbv(40)}",
+      "expected": "100"
+    },
+    {
+      "raw": "@{format(2,3)}",
+      "expected": "2.000"
+    },
+    {
+      "raw": "@{fixed(2)}",
+      "expected": "2.00"
+    },
+    {
+      "raw": "@{currency(2,\"USD\")}",
+      "expected": "USD2.00"
+    },
+    {
+      "raw": "@{enearest(990,\"E24\")}",
+      "expected": "910"
+    },
+    {
+      "raw": "@{eup(100,\"E24\")}",
+      "expected": "110"
+    },
+    {
+      "raw": "@{edown(100,\"E24\")}",
+      "expected": "91"
+    },
+    {
+      "raw": "@{enearest(100,\"E192\")}",
+      "expected": "100"
+    },
+    {
+      "raw": "@{dateformat(0)}",
+      "expected": "1970-01-01"
+    },
+    {
+      "raw": "@{datestring(\"1970-01-02\")}",
+      "expected": "1"
+    },
+    {
+      "raw": "@{weekdayname(0)}",
+      "expected": "Thursday"
+    },
+    {
+      "raw": "@{dateformat(-1,\"US\")}",
+      "expected": "12/31/1969"
+    },
+    {
+      "raw": "@{afterfirst(\"abc\", \":\")}",
+      "expected": ""
+    },
+    {
+      "raw": "@{afterlast(\"abc\", \":\")}",
+      "expected": "abc"
+    },
+    {
+      "raw": "@{4k7}",
+      "expected": "47000"
+    },
+    {
+      "raw": "@{1mm}",
+      "expected": "1"
+    },
+    {
+      "raw": "@{1u3}",
+      "expected": "1.3e-05"
+    },
+    {
+      "raw": "@{format(1.5,0)}",
+      "expected": "2"
+    },
+    {
+      "raw": "${${KEY}}",
+      "expected": "3"
+    },
+    {
+      "raw": "${FIELD@{2+3}}",
+      "expected": "value"
+    },
+    {
+      "raw": "\\${A}",
+      "expected": "${A}"
+    },
+    {
+      "raw": "\\@{1+2}",
+      "expected": "@{1+2}"
+    },
+    {
+      "raw": "${A}",
+      "expected": "3"
+    },
+    {
+      "raw": "${MISSING}",
+      "expected": "${MISSING}"
+    },
+    {
+      "raw": "@{1/0} @{2+3}",
+      "expected": "@{1/0} 5"
+    },
+    {
+      "raw": "@{if(1,2,1/0)}",
+      "expected": "@{if(1,2,1/0)}"
+    },
+    {
+      "raw": "@{if(0==1,\"removed\",\" \")",
+      "expected": " "
+    },
+    {
+      "raw": "before @{1+2",
+      "expected": "before 3"
+    },
+    {
+      "raw": "${MISSING",
+      "expected": "${MISSING}"
+    }
+  ]
+}

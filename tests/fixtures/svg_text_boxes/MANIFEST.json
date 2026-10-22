@@ -1,0 +1,16 @@
+{
+  "kind": "CONSTRUCTED",
+  "source": "KiCad 10.0.4 sym export svg",
+  "purpose": "Text box wrapping, margins, multiline alignment, and rotation",
+  "normalization": "Subtract page translation measured with a separate origin circle. Retain absolute M/L paths and circle geometry.",
+  "origin_marker_radius_mm": 0.125,
+  "input": "Constructed by test_symbol_text_box_matches_kicad in tests/unit/render/test_text_boxes.py",
+  "board": {
+    "kind": "CONSTRUCTED",
+    "source": "KiCad 10.0.4 pcb export svg --layers F.SilkS --exclude-drawing-sheet",
+    "purpose": "Horizontal and non-cardinal text boxes plus a rotated footprint",
+    "geometry_matched": 271,
+    "tolerance_mm": 0.002,
+    "normalization": "Trailing line whitespace removed. Geometry and styles unchanged."
+  }
+}

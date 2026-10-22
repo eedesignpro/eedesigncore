@@ -1,0 +1,166 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(paper "B")
+	(lib_symbols)
+	(text "@{upper(\"${PROJECT_TITLE}\")}"
+		(exclude_from_sim no)
+		(at 215.9 19.05 0)
+		(effects
+			(font
+				(size 7.62 7.62)
+				(bold yes)
+			)
+			(justify top)
+		)
+		(uuid "38cef9de-9c1c-4660-8ce9-c0f531d454ff")
+	)
+	(text "GIT INFO"
+		(exclude_from_sim no)
+		(at 15.24 17.78 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(bold yes)
+			)
+			(justify left)
+		)
+		(uuid "4c150073-7d2e-4539-afab-59d6edd49cd4")
+	)
+	(table
+		(column_count 2)
+		(border
+			(external yes)
+			(header yes)
+			(stroke
+				(width 0)
+				(type solid)
+			)
+		)
+		(separators
+			(rows yes)
+			(cols yes)
+			(stroke
+				(width 0)
+				(type solid)
+			)
+		)
+		(column_widths 8.89 29.21)
+		(row_heights 2.54 2.54 2.54)
+		(uuid "b26fcef4-70a0-455b-943d-96e9f40a0589")
+		(cells
+			(table_cell "BRANCH"
+				(exclude_from_sim no)
+				(at 15.24 20.32 0)
+				(size 8.89 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.254)
+						(bold yes)
+					)
+					(justify left)
+				)
+				(uuid "88d5473b-0bc2-4e6f-8f86-7e58108d85b1")
+			)
+			(table_cell "${GIT_BRANCH}"
+				(exclude_from_sim no)
+				(at 24.13 20.32 0)
+				(size 29.21 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.1588)
+					)
+					(justify left)
+				)
+				(uuid "96344012-7712-4e8d-959b-f509331f5368")
+			)
+			(table_cell "DATE"
+				(exclude_from_sim no)
+				(at 15.24 22.86 0)
+				(size 8.89 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.254)
+						(bold yes)
+					)
+					(justify left)
+				)
+				(uuid "a2629f44-e084-4436-a61a-9849e1282902")
+			)
+			(table_cell "${GIT_DATE}"
+				(exclude_from_sim no)
+				(at 24.13 22.86 0)
+				(size 29.21 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.1588)
+					)
+					(justify left)
+				)
+				(uuid "ccba4c1c-dec2-4d42-9271-8ea2712a592d")
+			)
+			(table_cell "COMMIT"
+				(exclude_from_sim no)
+				(at 15.24 25.4 0)
+				(size 8.89 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.254)
+						(bold yes)
+					)
+					(justify left)
+				)
+				(uuid "14f5604f-e29f-4dab-a7c9-4cf84e8b0e35")
+			)
+			(table_cell "${GIT_SHORT_HASH}"
+				(exclude_from_sim no)
+				(at 24.13 25.4 0)
+				(size 29.21 2.54)
+				(margins 0.9525 0.9525 0.9525 0.9525)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(thickness 0.1588)
+					)
+					(justify left)
+				)
+				(uuid "a6ebd1f7-c8f4-447d-a952-7f587dc5c323")
+			)
+		)
+	)
+)

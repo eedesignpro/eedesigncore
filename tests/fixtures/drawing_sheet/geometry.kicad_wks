@@ -1,0 +1,34 @@
+(kicad_wks
+	(version 20231118)
+	(generator "pl_editor")
+	(generator_version "10.0")
+	(setup
+		(textsize 1.5 1.5)
+		(linewidth 0)
+		(textlinewidth 0)
+		(left_margin 10)
+		(right_margin 10)
+		(top_margin 10)
+		(bottom_margin 10)
+	)
+	(line
+		(name "")
+		(start 3 4 ltcorner)
+		(end 30 4 ltcorner)
+		(repeat 3)
+		(incry 5)
+	)
+	(rect
+		(name "")
+		(start 2 3)
+		(end 25 20)
+	)
+	(polygon
+		(name "")
+		(pos 40 40 ltcorner)
+		(rotate 30)
+		(pts
+			(xy 0 0) (xy 5 0) (xy 0 5)
+		)
+	)
+)

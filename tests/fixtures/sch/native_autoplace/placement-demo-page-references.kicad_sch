@@ -1,0 +1,338 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(lib_symbols)
+	(label "LOCAL_NET"
+		(at 50.8 228.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "46b10685-822d-4dee-bc84-9bf2efc7f747")
+	)
+	(global_label "R1_1"
+		(shape passive)
+		(at 50.8 62.23 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2b58f044-61fc-4a47-89bd-237065a6bfd0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 56.4146 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "RIGHT_PORT"
+		(shape passive)
+		(at 351.79 100.33 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "464c0dbf-fdc6-4ebd-8ba4-4b04a2e4a710")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 363.8514 100.33 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "REFERENCE"
+		(shape passive)
+		(at 224.79 100.33 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "569219b1-e62a-4d82-906f-d17fa45e4ca8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 213.7696 100.33 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "D1_1"
+		(shape passive)
+		(at 138.43 76.2 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "7c9555b0-294b-4e8d-a6a2-9750c96d9bdb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 132.6146 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "READY"
+		(shape output)
+		(at 224.79 87.63 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "80671550-d607-45b4-b88d-3dcc7e7e4f03")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 216.8223 87.63 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "BUS_OUT"
+		(shape tri_state)
+		(at 224.79 125.73 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "82ab01d2-cd57-4d7a-afd8-645a7449f053")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 213.629 125.73 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "C1_2"
+		(shape passive)
+		(at 101.6 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "956f98cd-028c-4c76-af14-0271a2894b95")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 95.9854 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "C1_1"
+		(shape passive)
+		(at 101.6 62.23 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9aefcf2f-0204-4dba-a3f9-bfb43d1bd5ae")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 101.6 56.4146 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "R1_2"
+		(shape passive)
+		(at 50.8 90.17 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ab44c911-4085-492c-adac-8f7806878b6a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 50.8 95.9854 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "ENABLE"
+		(shape input)
+		(at 224.79 74.93 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d675e6d4-2cd6-4ba6-a689-90219fc18841")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 215.7813 74.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "BOTTOM_PORT"
+		(shape passive)
+		(at 328.93 158.75 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "e44aa3b5-01be-44c1-b909-7e5ede1f13ea")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 328.93 171.8524 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "TOP_PORT"
+		(shape passive)
+		(at 328.93 49.53 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f12d5c72-a396-4c1b-a9c2-650c86192af6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 328.93 39.5506 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "D1_2"
+		(shape passive)
+		(at 166.37 76.2 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f2b28d0e-2d40-49ed-aaa9-117fa2d106d4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 172.1854 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "DATA"
+		(shape bidirectional)
+		(at 224.79 113.03 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f8763c42-00ec-4627-a2ca-e53321090c0a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 216.752 113.03 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+)

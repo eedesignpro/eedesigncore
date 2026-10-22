@@ -1,0 +1,35 @@
+{
+  "status": "CONSTRUCTED",
+  "purpose": "Public read-only schematic preparation and viewer associations",
+  "oracle": "kicad-cli 10.0.4",
+  "target": "KiCad 10.0.3",
+  "capture_date": "2026-09-25",
+  "capture_command": "kicad-cli sch export netlist --format kicadxml -o <capture.xml> <root.kicad_sch>",
+  "expected_data": "expected_nets.json retains net names and sorted ref/pin pairs from the XML nets section. Source paths and timestamps are excluded.",
+  "features": [
+    "hierarchy",
+    "repeated-sheet",
+    "multi-unit",
+    "global-label",
+    "hierarchical-label",
+    "sheet-pin",
+    "junction",
+    "bus",
+    "hierarchical-bus",
+    "alternate-pin"
+  ],
+  "files": {
+    "alternate/expected_nets.json": "089cd06c1b20a7beaafc6af6189fae1e2f0d5f1e2b9a35a9df4332d338f659fe",
+    "alternate/module.kicad_sch": "1340d25615d963385fbace60f69258df9ea8213ee6556beb5c1894b07973f008",
+    "alternate/root.kicad_pro": "e3566b3a06430868d71e9287dfd6c6c520a3da027aabea01951d407ee131dc2f",
+    "alternate/root.kicad_sch": "bd56d664130e9a00447c93caf7cfc8656d76c10cd9766ac05c34cf91536d8a75",
+    "expected_nets.json": "819dc7092e012d4ae815942777c8ddd387ce9eae39b7f22f6aae4384cd1d818e",
+    "hierarchical_bus/expected_nets.json": "4baf93a0b59a2738cd2cab2e7efbbae99308aba87c228d75cffea7ea0dfe5908",
+    "hierarchical_bus/module.kicad_sch": "7caf1b8c83552f53b0a01531661e026c533775fb2db808884fd1d599dbfc7150",
+    "hierarchical_bus/root.kicad_pro": "e3566b3a06430868d71e9287dfd6c6c520a3da027aabea01951d407ee131dc2f",
+    "hierarchical_bus/root.kicad_sch": "131e14b3c0f54038564cbd71bdf45c55d1f7be71842ae66f93bdbba54e7d0134",
+    "module.kicad_sch": "5fc7718fe14ba4d0642271e4962f4908113e8bb5fc33c3b0fd05d55fead47205",
+    "root.kicad_pro": "e3566b3a06430868d71e9287dfd6c6c520a3da027aabea01951d407ee131dc2f",
+    "root.kicad_sch": "bd56d664130e9a00447c93caf7cfc8656d76c10cd9766ac05c34cf91536d8a75"
+  }
+}

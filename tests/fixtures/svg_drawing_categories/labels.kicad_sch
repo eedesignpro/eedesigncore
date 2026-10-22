@@ -1,0 +1,135 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "06e03688-90b6-4b79-88ef-13e5543bcb67")
+	(lib_symbols)
+	(label "ABC\nDEF"
+		(at 135 30 270)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "03ca34ac-a867-4daa-b6a7-cc1a17950db9")
+	)
+	(label "ABC\nDEF"
+		(at 100 30 180)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "2f431711-a043-4af9-822f-7420cb12a93d")
+	)
+	(label "ABC\nDEF"
+		(at 30 30 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "8ec4bc2b-22db-45c7-8d31-4736e0a3aa15")
+	)
+	(label "ABC\nDEF"
+		(at 65 30 90)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "c6556260-76cc-498c-b580-1a9ed660f738")
+	)
+	(global_label "ABC\nDEF"
+		(shape input)
+		(at 65 55 90)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "b3c7dfcf-1c18-4924-a2aa-8a5a2816c3d9")
+	)
+	(global_label "ABC\nDEF"
+		(shape input)
+		(at 30 55 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "ced20078-36b0-45a2-9e1f-532b13e8057a")
+	)
+	(global_label "ABC\nDEF"
+		(shape input)
+		(at 100 55 180)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "e7529ed2-763e-4e32-8da4-c34828c01940")
+	)
+	(global_label "ABC\nDEF"
+		(shape input)
+		(at 135 55 270)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "f34bd1db-1586-4a8f-8c11-bd887fac0f3a")
+	)
+	(hierarchical_label "ABC\nDEF"
+		(shape input)
+		(at 30 80 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "1020f1fd-92ca-487a-b02e-095c2faeccd8")
+	)
+	(hierarchical_label "ABC\nDEF"
+		(shape input)
+		(at 65 80 90)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left)
+		)
+		(uuid "205d0ad4-7453-44c8-9cc3-9d7a42e3d9e7")
+	)
+	(hierarchical_label "ABC\nDEF"
+		(shape input)
+		(at 100 80 180)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "623fb431-135c-42f4-8005-55a033f02024")
+	)
+	(hierarchical_label "ABC\nDEF"
+		(shape input)
+		(at 135 80 270)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "868e0aef-91d0-466a-a123-89970d9a50d4")
+	)
+)

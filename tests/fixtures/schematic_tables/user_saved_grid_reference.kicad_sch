@@ -1,0 +1,220 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "015da12a-dbd5-4a9f-a563-8c9856682485")
+	(paper "A4")
+	(lib_symbols)
+	(table
+		(column_count 2)
+		(border
+			(external yes)
+			(header yes)
+			(stroke
+				(width 0.1524)
+				(type default)
+			)
+		)
+		(separators
+			(rows yes)
+			(cols yes)
+			(stroke
+				(width 0.1524)
+				(type default)
+			)
+		)
+		(column_widths 13.97 34.503)
+		(row_heights 2.54 2.54 2.54 2.54 5.08)
+		(uuid "947d6475-d53f-4568-b049-fa639c9de52f")
+		(cells
+			(table_cell "Abbreviation"
+				(exclude_from_sim no)
+				(at 25.4 25.4 0)
+				(size 13.97 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+						(bold yes)
+					)
+					(justify left)
+				)
+				(uuid "8c382405-7cfc-4e39-bbc1-4a17d8cf7147")
+			)
+			(table_cell "Meaning"
+				(exclude_from_sim no)
+				(at 39.37 25.4 0)
+				(size 34.503 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+						(bold yes)
+					)
+					(justify left)
+				)
+				(uuid "8e0e5270-0d6a-4d75-9fc0-72b9975f77c6")
+			)
+			(table_cell "PWR"
+				(exclude_from_sim no)
+				(at 25.4 27.94 0)
+				(size 13.97 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "41863b48-5858-4abc-9d25-d570aa8f33d5")
+			)
+			(table_cell "Power supply"
+				(exclude_from_sim no)
+				(at 39.37 27.94 0)
+				(size 34.503 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "4c171bca-5e87-4817-a549-0016e665ee85")
+			)
+			(table_cell "NC"
+				(exclude_from_sim no)
+				(at 25.4 30.48 0)
+				(size 13.97 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "229e1831-f58e-4abb-a092-156cf1b1bdd4")
+			)
+			(table_cell "No connection"
+				(exclude_from_sim no)
+				(at 39.37 30.48 0)
+				(size 34.503 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "6810fe12-8fc0-45b3-af7f-e45ac288fe22")
+			)
+			(table_cell "nFAIL"
+				(exclude_from_sim no)
+				(at 25.4 33.02 0)
+				(size 13.97 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "e91e5bcc-e398-4eaf-99bd-1529bb0018b8")
+			)
+			(table_cell "Active-low fault indication"
+				(exclude_from_sim no)
+				(at 39.37 33.02 0)
+				(size 34.503 2.54)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "3f58372d-2d79-4e05-9b7b-2c4e1430ff96")
+			)
+			(table_cell "IFC"
+				(exclude_from_sim no)
+				(at 25.4 35.56 0)
+				(size 13.97 5.08)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "9d225570-dd85-4678-83fe-8e5d5268da98")
+			)
+			(table_cell "Interface contract\nDefines electrical requirements"
+				(exclude_from_sim no)
+				(at 39.37 35.56 0)
+				(size 34.503 5.08)
+				(margins 0.5 0.5 0.5 0.5)
+				(span 1 1)
+				(fill
+					(type none)
+				)
+				(effects
+					(font
+						(face "Cascadia Mono")
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+				(uuid "4ea4bc66-7797-44e9-9d77-5a4718c6a0d8")
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

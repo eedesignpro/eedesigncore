@@ -1,0 +1,79 @@
+[build-system]
+# hatchling 1.32.0 is the first version that emits Metadata-Version 2.5, which
+# twine 6.1.0 rejects. See context/release-publishing.md, section BUILD.
+requires = ["hatchling>=1.27,<1.32"]
+build-backend = "hatchling.build"
+
+[project]
+name = "eedesigncore"
+dynamic = ["version"]
+description = "Parse, manipulate, and write KiCad 10 S-expression files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+dependencies = ["pydantic>=2.10,<3", "pyclipper>=1.4,<2", "zxing-cpp>=3.1.1,<4", "pcre2>=0.7.1,<0.8", "zstandard==0.25.0; python_version < \"3.14\""]
+
+# The registry landing page renders these. Every target that names a path in
+# this repository is checked by tests/integration/test_consumer_surface.py.
+[project.urls]
+Homepage = "https://github.com/eedesignpro/eedesigncore"
+Repository = "https://github.com/eedesignpro/eedesigncore"
+Changelog = "https://github.com/eedesignpro/eedesigncore/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/eedesignpro/eedesigncore/blob/main/docs/agent/README.md"
+Issues = "https://github.com/eedesignpro/eedesigncore/issues"
+
+[project.optional-dependencies]
+fonts = ["fonttools>=4.66,<5", "uharfbuzz>=0.56.2,<0.57"]
+dev = [
+    "fonttools>=4.66,<5",
+    "uharfbuzz>=0.56.2,<0.57",
+    "ruff==0.11.11",
+    "mypy==1.15.0",
+    "pytest==8.3.5",
+    "pytest-cov==6.1.0",
+    "build==1.3.0",
+    # The build backend, installed so the wheel-manifest test can call it
+    # in process. Same bound as [build-system] requires.
+    "hatchling>=1.27,<1.32",
+    "zstandard==0.25.0",
+]
+
+# src/eedesigncore/_version.py is the single place the release-manager edits
+# (R15). It sits INSIDE the package so the value travels with the code: the
+# wheel does not ship the repository root, so a root VERSION file could not be
+# read at import time (UF-012). Hatchling's default pattern finds __version__.
+[tool.hatch.version]
+path = "src/eedesigncore/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eedesigncore"]
+
+# The support set ships inside the package, not at the site-packages root, so
+# the wheel adds no new top-level entry (ADR-079). The layout under
+# eedesigncore/ mirrors the repository root, so every relative pointer in the
+# documents still resolves offline.
+[tool.hatch.build.targets.wheel.force-include]
+"docs" = "eedesigncore/docs"
+"README.md" = "eedesigncore/README.md"
+"CHANGELOG.md" = "eedesigncore/CHANGELOG.md"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "scripts", "docs", "VERSION", "constraints.txt", "README.md", "CHANGELOG.md"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=eedesigncore --cov-report=term-missing --cov-fail-under=80"

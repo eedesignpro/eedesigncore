@@ -1,0 +1,38 @@
+(kicad_wks
+	(version 20231118)
+	(generator "pl_editor")
+	(generator_version "10.0")
+	(setup
+		(textsize 1.5 1.5)
+		(linewidth 0)
+		(textlinewidth 0)
+		(left_margin 10)
+		(right_margin 10)
+		(top_margin 10)
+		(bottom_margin 10)
+	)
+	(tbtext "${TITLE} ${#}/${##}"
+		(name "")
+		(pos 20 20 ltcorner)
+	)
+	(tbtext "A"
+		(name "")
+		(pos 20 30 ltcorner)
+		(repeat 4)
+		(incrx 15)
+	)
+	(tbtext "first"
+		(name "")
+		(pos 20 50 ltcorner)
+		(option page1only)
+	)
+	(tbtext "other"
+		(name "")
+		(pos 20 60 ltcorner)
+		(option notonpage1)
+	)
+	(tbtext "@{1+2}"
+		(name "")
+		(pos 20 70 ltcorner)
+	)
+)
