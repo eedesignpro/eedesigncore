@@ -48,7 +48,7 @@ AGENT_DOCUMENTS = [HUB, *SPOKES] if AGENTS is None else [AGENTS, HUB, *SPOKES]
 # full to within a handful of bytes, so the next public export could not be
 # documented without evicting something a reader needs. The budgets still
 # bind: they stop a spoke's detail migrating into the hub.
-BUDGET = {HUB: 16384, **{spoke: 8192 for spoke in SPOKES}}
+BUDGET = {HUB: 17408, **{spoke: 8192 for spoke in SPOKES}}
 if AGENTS is not None:
     BUDGET[AGENTS] = 4096
 

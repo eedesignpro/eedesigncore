@@ -67,6 +67,8 @@ Boards and footprints:
 - [Drawing sheets](docs/drawing-sheets.md)
 - [Read saved net class assignments](docs/net-class-assignments.md)
 - [Selected schematic-to-PCB updates](docs/schematic-board-update.md)
+- [Update the PCB from the schematic, and the schematic from the PCB](docs/schematic-pcb-updates.md)
+- [Update Symbol from Library and Change Symbol](docs/symbol-library-updates.md)
 - [Pad apertures and backdrill depth](docs/pad-apertures-and-backdrill-depth.md)
 - [Selected plot content bounds](docs/plot-content-bounds.md)
 

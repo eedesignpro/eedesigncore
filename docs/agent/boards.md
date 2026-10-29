@@ -176,7 +176,7 @@ draw, with a reason. It exits non-zero on a case that has no reason.
 - No board copper connectivity. The library does not work out which pads
   connect through tracks and zones. Schematic connectivity is in
   `docs/schematic-electrical-inspection.md`.
-- Forward and back annotation: see `docs/agent/README.md § Not implemented`.
+- [Design updates](../schematic-pcb-updates.md) provide both directions with explicit safety limits.
 - No DRC, no zone filling, and no track routing. Not planned. Use `kicad-cli`.
 - Custom rule files use `DrcFile`. See `docs/custom-design-rules.md`.
 - No plotting, gerber, drill, or 3D export. Not planned. Use `kicad-cli`.

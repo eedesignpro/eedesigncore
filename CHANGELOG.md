@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.0] - 2026-10-29
+
+- Add PCB updates from schematics and schematic updates from PCB footprints.
+- Add independent controls, detached previews, multi-unit handling, and guarded application.
+- Transfer footprint definitions, fields, groups, pad nets, and population settings.
+- Support physical net-label edits, complete unit swaps, and explicit reciprocal pin swaps.
+- Block unsupported copper splits, assembly variants, stacked pins, and rule-area inheritance.
+
+- Add schematic symbol updates from libraries and changes to other library identifiers.
+- Add independent field and attribute controls, preserved-custom-field and atomic-part choices.
+- Add detached batch previews, pin mismatch reports, and embedded-definition cache handling.
+- Preserve sheet instances and expose source-derived behavior with pending GUI golden cases.
+
 ## [0.38.0] - 2026-10-20
 
 Release candidate. Not tagged or published.
@@ -92,7 +105,7 @@ Published. Registry presence verified on 2026-10-06.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.39.0] - 2026-10-29
 
 - Match root-relative PCB symbol paths to full schematic occurrence paths in NetBOM.
 - Preserve ambiguity checks across repeated sheets, multiple roots, and multi-unit symbols.

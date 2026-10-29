@@ -292,6 +292,11 @@ from eedesigncore.pcb.schematic_update import (
     apply_schematic_board_update,
     plan_schematic_board_update,
 )
+from eedesigncore.pcb.update_from_schematic import (
+    apply_update_pcb_from_schematic,
+    plan_update_pcb_from_schematic,
+    update_pcb_from_schematic,
+)
 from eedesigncore.pro import (
     JsonFloat,
     JsonInt,
@@ -310,6 +315,16 @@ from eedesigncore.project import (
     SheetNode,
     load_hierarchy,
     read_netclass_assignments,
+)
+from eedesigncore.project.update_models import (
+    DesignUpdateChange,
+    DesignUpdateIssue,
+    PcbUpdateOptions,
+    PcbUpdatePlan,
+    PcbUpdateResult,
+    SchematicUpdateOptions,
+    SchematicUpdatePlan,
+    SchematicUpdateResult,
 )
 from eedesigncore.render import (
     ALL_CONTENT,
@@ -383,6 +398,26 @@ from eedesigncore.sch.creation import (
     create_hierarchical_label,
     create_sheet,
 )
+from eedesigncore.sch.library_update import (
+    apply_symbol_library_updates,
+    change_symbol,
+    plan_symbol_library_updates,
+    select_symbol_library_targets,
+    update_symbol_from_library,
+)
+from eedesigncore.sch.library_update_models import (
+    SymbolAttributeUpdateOptions,
+    SymbolFieldUpdateOptions,
+    SymbolFieldUpdatePolicy,
+    SymbolLibraryChange,
+    SymbolLibraryFieldChange,
+    SymbolLibraryPinChange,
+    SymbolLibraryUpdateIssue,
+    SymbolLibraryUpdateOptions,
+    SymbolLibraryUpdatePlan,
+    SymbolLibraryUpdateResult,
+    SymbolLibraryUpdateTarget,
+)
 from eedesigncore.sch.measurement import (
     MeasuredSchematicItem,
     SchematicMeasurement,
@@ -404,6 +439,11 @@ from eedesigncore.sch.notes import (
 )
 from eedesigncore.sch.subsheets import CreatedSubsheet, create_sheet_schematic, create_subsheet
 from eedesigncore.sch.tables import create_schematic_table, fit_schematic_table
+from eedesigncore.sch.update_from_pcb import (
+    apply_update_schematic_from_pcb,
+    plan_update_schematic_from_pcb,
+    update_schematic_from_pcb,
+)
 from eedesigncore.schematic_view import (
     AssemblyStack,
     AssemblyWorkspace,
@@ -468,6 +508,22 @@ from eedesigncore.text_resolution import (
 from eedesigncore.text_resolution.runtime import GitTextResolver, capture_text_context
 
 __all__ = [
+    "apply_symbol_library_updates",
+    "change_symbol",
+    "plan_symbol_library_updates",
+    "select_symbol_library_targets",
+    "update_symbol_from_library",
+    "SymbolFieldUpdatePolicy",
+    "SymbolFieldUpdateOptions",
+    "SymbolAttributeUpdateOptions",
+    "SymbolLibraryUpdateOptions",
+    "SymbolLibraryUpdateTarget",
+    "SymbolLibraryUpdateIssue",
+    "SymbolLibraryFieldChange",
+    "SymbolLibraryPinChange",
+    "SymbolLibraryChange",
+    "SymbolLibraryUpdatePlan",
+    "SymbolLibraryUpdateResult",
     "create_schematic_table",
     "fit_schematic_table",
     "create_global_label",
@@ -906,6 +962,20 @@ __all__ += [
 __all__ += ["append_global_label_netclasses"]
 
 __all__ += [
+    "DesignUpdateChange",
+    "DesignUpdateIssue",
+    "PcbUpdateOptions",
+    "PcbUpdatePlan",
+    "PcbUpdateResult",
+    "SchematicUpdateOptions",
+    "SchematicUpdatePlan",
+    "SchematicUpdateResult",
+    "plan_update_pcb_from_schematic",
+    "apply_update_pcb_from_schematic",
+    "update_pcb_from_schematic",
+    "plan_update_schematic_from_pcb",
+    "apply_update_schematic_from_pcb",
+    "update_schematic_from_pcb",
     "BoardUpdateSelection",
     "BoardPadNetUpdate",
     "BoardFootprintUpdate",

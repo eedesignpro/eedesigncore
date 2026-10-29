@@ -1777,3 +1777,8 @@ Use `render_schematic_svg` for one loaded sheet. See [schematic SVG exports](svg
 Use `resolve_text` for strings and `resolve_document_text` for loaded documents.
 Both retain raw text and report unresolved values. SVG exports accept `text_context`.
 See [text resolution](text-resolution.md) for sheet selection, runtime providers, and limits.
+
+## Update a design from its schematic or PCB
+
+See [schematic and PCB updates](schematic-pcb-updates.md) for both high-level operations.
+The existing selected-footprint update API keeps its original behavior.

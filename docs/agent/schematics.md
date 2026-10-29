@@ -120,7 +120,7 @@ path. Two consequences.
 - Electrical content the library cannot resolve is listed in the coverage
   record of the result. It is not dropped silently.
 - No annotation across sheets. Auto-annotation sees one file.
-- Forward and back annotation: see `docs/agent/README.md § Not implemented`.
+- [Design updates](../schematic-pcb-updates.md) provide both directions with explicit safety limits.
 - `load_hierarchy` never writes. There is no whole-project save.
 
 ## SVG from memory

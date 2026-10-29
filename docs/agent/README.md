@@ -19,8 +19,6 @@ Read this file, `docs/agent/common.md`, and the guide for your file type.
 
 ## Primary API
 
-Root methods:
-
 | Call | Result |
 |---|---|
 | `Model.from_file(path)` | Read from disk. Records the source line endings. |
@@ -61,8 +59,7 @@ argument is keyword-only, and none of the six touches the disk.
 | `strip_uuids(model)` | Clears uuid values in place, group-aware. Returns `None`. |
 | `generate_uuids(model)` | Mints uuid version 4 values in place. Returns `None`. |
 
-Full signatures, nickname resolution, and the collision rule live in
-`docs/operations.md § One calling contract`.
+Details: `docs/operations.md § One calling contract`.
 
 ## Support boundaries
 
@@ -71,18 +68,17 @@ The package-root `__all__` defines the supported API and includes all types reac
 Sub-package exports can be wider and do not expand the support promise.
 Import from `eedesigncore`. The package ships `py.typed`; verify exact signatures in source.
 
-Removing or renaming a supported name is breaking. Additions are permanent.
-Internal base classes and text-tree internals remain private, except `parse`, `SExprNode`, and `SExprNodeType`.
-A type alias is supported when a public field or return names it.
+Supported names cannot be removed or renamed compatibly. Additions are permanent.
+Base classes and text-tree internals are private except `parse`, `SExprNode`, and `SExprNodeType`.
+Field and return aliases are supported.
 
 ## Every public name
-
-Import only the root names you need. Generic names can collide with caller names.
 
 | Category | Names |
 |---|---|
 | Drawing sheets | `DrawingSheet`, `DrawingSheetCoordinate`, `DrawingSheetSetup`, `DrawingSheetItem`, `DrawingSheetGraphics`, `load_wks`, `dump_wks`, `write_wks`, `drawing_sheet_graphics`, `render_drawing_sheet_svg` |
 | Root models | `Footprint`, `SymbolLib`, `Board`, `Schematic`, `ProjectFile`, `ProjectLocalSettings`, `LibTable` |
+| Design updates | `PcbUpdateOptions`, `SchematicUpdateOptions`, `DesignUpdateChange`, `DesignUpdateIssue`, `PcbUpdatePlan`, `PcbUpdateResult`, `SchematicUpdatePlan`, `SchematicUpdateResult`, `plan_update_pcb_from_schematic`, `apply_update_pcb_from_schematic`, `update_pcb_from_schematic`, `plan_update_schematic_from_pcb`, `apply_update_schematic_from_pcb`, `update_schematic_from_pcb` |
 | Operations | `extract_footprint`, `inject_footprint`, `extract_symbol`, `inject_symbol`, `strip_uuids`, `generate_uuids`, `derive_uuids`, `DERIVED_UUID_NAMESPACE`, `inject_board`, `InjectedContent`, `new_board_from`, `rename_nets`, `rename_footprint_nets`, `extract_fills`, `replace_fills`, `flatten_fills`, `item_layers`, `items_on_layers`, `translate_board`, `translate_footprint`, `translate_items`, `rotate_board`, `rotate_footprint`, `rotate_items`, `set_footprint_orientation`, `flip_footprint`, `flip_board`, `board_bbox`, `footprint_bbox`, `items_bbox` |
 | Loaders and writers | `load_mod`, `dump_mod`, `write_mod`, `load_sym`, `dump_sym`, `write_sym`, `load_pcb`, `dump_board`, `write_board`, `load_sch`, `dump_sch`, `write_sch`, `load_lib_table`, `dump_lib_table`, `write_lib_table`, `parse_json`, `load_pro`, `load_prl`, `dump_json` |
 | S-expression tree | `parse`, `SExprNode`, `SExprNodeType` |
@@ -100,6 +96,7 @@ Import only the root names you need. Generic names can collide with caller names
 | Footprint members | `FootprintAttrs`, `FootprintPlacement`, `Model3D`, `Pad`, `DrillInfo`, `TeardropParams`, `Padstack`, `PadstackLayer`, `BackdrillInfo`, `PostMachining`, `PrimLine`, `PrimRect`, `PrimArc`, `PrimCircle`, `PrimCurve`, `PrimPoly`, `PrimVector`, `PrimBbox`, `PadPrimitive`, `Variant`, `VariantField`, `ComponentClasses`, `FootprintGateUnit`, `FootprintUnitInfo`, `Stackup`, `StackupLayer`, `JumperPadGroups` |
 | Board members | `BoardGeneral`, `BoardLayer`, `LayerTypeToken`, `BoardStackup`, `BoardStackupLayer`, `BoardStackupSubLayer`, `BoardVariant`, `PlotParams`, `Setup`, `TrackSegment`, `TrackArc`, `TrackItem`, `Via`, `ViaFrontBackOpt`, `ViaPadstack`, `ViaPadstackLayer`, `PcbGenerator`, `GenNumber`, `GenBool`, `GenPoint`, `GenPts`, `GenString`, `GeneratorValue`, `PcbTarget` |
 | Symbol members | `Symbol`, `SymbolUnit`, `SymbolItem`, `Pin`, `PinAlternate`, `SymText`, `SymTextBox`, `SchArc`, `SchBezier`, `SchCircle`, `SchPolyline`, `SchRect`, `GraphicShape` |
+| Symbol library updates | `SymbolFieldUpdatePolicy`, `SymbolFieldUpdateOptions`, `SymbolAttributeUpdateOptions`, `SymbolLibraryUpdateOptions`, `SymbolLibraryUpdateTarget`, `SymbolLibraryUpdateIssue`, `SymbolLibraryFieldChange`, `SymbolLibraryPinChange`, `SymbolLibraryChange`, `SymbolLibraryUpdatePlan`, `SymbolLibraryUpdateResult`, `plan_symbol_library_updates`, `apply_symbol_library_updates`, `select_symbol_library_targets`, `update_symbol_from_library`, `change_symbol` |
 | Schematic members | `PlacedSymbol`, `PlacedSymbolPin`, `InstancePath`, `InstanceProject`, `InstanceVariant`, `InstanceVariantField`, `Junction`, `NoConnect`, `BusEntry`, `Line`, `SchText`, `Label`, `SchTextBox`, `RuleArea`, `Image`, `Group`, `SchTable`, `SchTableCell`, `Sheet`, `SheetPin`, `SheetVariant`, `SheetVariantField`, `SheetInstancePath`, `SheetInstanceProject`, `SheetInstances`, `RootInstancePath` |
 | Exceptions | `KicadParseError`, `EmbeddedFileChecksumError`, `LibTableResolutionError`, `SheetHierarchyError`, `ZstdBackendUnavailableError`, `ZstdDecompressionError` |
 | Part navigation | `PartRecord`, `PartMatch`, `MatchReason`, `FieldTest`, `search_records`, `library_item_names`, `iter_library_records`, `iter_table_records` |
@@ -129,9 +126,8 @@ Import only the root names you need. Generic names can collide with caller names
 parts fits". A symbol library may be one `.kicad_sym` file or a folder with
 one file per part. Both are read.
 
-`search_records` is KiCad's own part search, ported weight for weight, with two
-deliberate differences: every field is searchable, and `key>10k` is not read as
-a number. Every match reports why it matched.
+`search_records` uses KiCad search weights. Every field is searchable.
+It does not read `key>10k` as a number. Matches report their reasons.
 
 A `Database` row needs rows a caller supplies. `load_kicad_dbl` reports the
 driver, tables, and columns that a `.kicad_dbl` file names. Your code connects,
@@ -145,10 +141,10 @@ how part information lands in a schematic, not which part to use. See
 
 | Capability | Status |
 |---|---|
-| Update PCB from schematic, forward annotation | Partial. `plan_schematic_board_update` updates footprints the caller selects. It does not add or remove footprints. See `docs/schematic-board-update.md`. |
-| Update schematic from PCB, back annotation | Not implemented. |
 | Automatic project drawing-sheet lookup | Not planned. Supply the template explicitly |
-| Update footprint or symbol from library | Not planned |
+| Copper-island reconstruction | Not implemented |
+| Design updates with assembly variants | Not implemented |
+| Design updates with rule-area inheritance | Not implemented |
 | KiCad netlist file export | Not planned. Use `kicad-cli` |
 | ERC checking | Not planned |
 | DRC checking | Not planned. Use `kicad-cli` |
