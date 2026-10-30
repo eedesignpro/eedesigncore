@@ -114,7 +114,8 @@ def design():
     fp = Footprint(
         uuid=uid("footprint"),
         fp_id="Test:Package",
-        path="/" + uid("root") + "/" + uid("symbol"),
+        # KiCad form: netlist sheet path without the root sheet, plus the symbol uuid.
+        path="/" + uid("symbol"),
         at=FootprintPlacement(position=(50, 60), angle=90),
         properties=[
             Property(name="Reference", value="U1", id=uid("reference")),

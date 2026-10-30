@@ -21,7 +21,7 @@ from eedesigncore.schematic_view.models import (
     SchematicCoverage,
     ViewItem,
 )
-from eedesigncore.schematic_view.native import prepare_schematic_view
+from eedesigncore.schematic_view.native import _prepare_schematic_view
 from eedesigncore.text_resolution import (
     TextResolutionContext,
     context_for_sheet,
@@ -126,12 +126,18 @@ def inspect_schematic_electrical(
     strict: bool = True,
     font: SymbolFont | None = None,
     text_context: TextResolutionContext | None = None,
+    drawing: bool = True,
 ) -> SchematicElectricalSnapshot:
     """Resolve current schematic facts without reading saved board assignments.
 
     Source hashes exist only for files read during this call. In-memory inputs
     have no claimed byte baseline. Class names are memberships, not effective
     clearance settings. Rule-area class attachment remains explicitly partial.
+
+    With *drawing* false no sheet is rendered (see ``prepare_schematic_view``).
+    Nets, parts, pins and labels are the same; items carry no drawn bounds and
+    the drawing coverage reads ``unavailable``. The board and schematic update
+    planners pass false.
     """
     hashes: dict[str, str] = {}
     if isinstance(source, str | Path):
@@ -140,13 +146,16 @@ def inspect_schematic_electrical(
                 source, strict=strict, max_occurrences=4096, max_total_bytes=256 * 1024 * 1024
             )
         hashes = {str(path): evidence[0] for path, evidence in capture.reads.items()}
-    view = prepare_schematic_view(
+    resolved_sheets: dict[str, Schematic] = {}
+    view = _prepare_schematic_view(
         source,
         document_id=document_id,
         instance=instance,
         strict=strict,
         font=font,
         text_context=text_context,
+        drawing=drawing,
+        resolved_sheets=resolved_sheets,
     )
     sheets = (
         [(node.kiid_path, node.schematic) for node in source.walk()]
@@ -185,14 +194,14 @@ def inspect_schematic_electrical(
     labels: dict[str, SchematicElectricalLabel] = {}
     parts: dict[str, SchematicElectricalPart] = {}
     class_issues: list[str] = []
-    drawing: dict[str, str] = {}
+    geometries: dict[str, str] = {}
     for path, sheet in sheets:
         context = (
             context_for_sheet(source, path, context=text_context)
             if isinstance(source, SheetHierarchy)
             else text_context or TextResolutionContext(instance_path=path)
         )
-        resolved = resolve_document_text(sheet, context).document
+        resolved = resolved_sheets.get(path) or resolve_document_text(sheet, context).document
         if sheet.rule_areas:
             class_issues.append(f"Rule-area class attachment is not calculated: {path}")
         for symbol in resolved.symbols:
@@ -280,7 +289,7 @@ def inspect_schematic_electrical(
             for field in label_data["fields"]:
                 field.pop("value", None)
         geometry.pop("lib_symbols", None)
-        drawing[path] = _json(geometry)
+        geometries[path] = _json(geometry)
     project = source.project if isinstance(source, SheetHierarchy) else None
     patterns: list[tuple[NetclassPattern, str, str]] = []
     if project is None:
@@ -354,7 +363,7 @@ def inspect_schematic_electrical(
         no_connect_pins=sorted(no_connect_pins),
         unbound_no_connect_ids=sorted(unbound),
         source_hashes=hashes,
-        drawing_signature=hashlib.sha256(_json(drawing).encode()).hexdigest(),
+        drawing_signature=hashlib.sha256(_json(geometries).encode()).hexdigest(),
     )
 
 

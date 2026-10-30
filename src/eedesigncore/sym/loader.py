@@ -86,6 +86,14 @@ def _load_property(node: SExprNode) -> Property:
         else:
             raise KicadParseError(f"Unknown token in property: {cname!r}")
 
+    # KiCad 9 writes a field's ``(hide yes)`` INSIDE ``(effects …)``
+    # (``SCH_FIELD::Format``, 9.0.9 ``eeschema/sch_field.cpp:517-586``); KiCad 10
+    # moved it to the property level. Both spellings mean the same field flag,
+    # so an effects-level hide lands on the property here. The writer alone
+    # decides where the token goes back (``legacy`` layout).
+    if attributes is not None and not attributes.visible:
+        visible = False
+
     return Property(
         private=private,
         name=name,

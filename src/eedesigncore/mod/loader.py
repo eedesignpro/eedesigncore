@@ -25,6 +25,7 @@ from eedesigncore.common.models import (
     EmbeddedFile,
     Property,
     PtsElement,
+    TextAttributes,
 )
 from eedesigncore.common.pcb_family import (
     BackdrillInfo,
@@ -67,6 +68,7 @@ from eedesigncore.mod.enums import (
     PadShape,
     PadType,
 )
+from eedesigncore.mod.legacy import CURRENT_VERSION, needs_upgrade, upgrade_footprint_tree
 from eedesigncore.mod.models import (
     DrillInfo,
     Footprint,
@@ -1126,11 +1128,16 @@ def _load_model(node: SExprNode) -> Model3D:
 # ---------------------------------------------------------------------------
 
 
-def load_mod(tree: SExprNode) -> Footprint:
+def load_mod(tree: SExprNode, *, board_version: int | None = None) -> Footprint:
     """Load a ``Footprint`` from a parsed S-expression tree.
+
+    A footprint older than the current format, including a KiCad 5 ``module``,
+    is first rewritten the way KiCad 10 reads it (:mod:`eedesigncore.mod.legacy`).
 
     Args:
         tree: The root ``SExprNode`` as returned by ``parse()``.
+        board_version: The board file version for a footprint inside a board,
+            which carries no version of its own. None for a library file.
 
     Returns:
         A fully populated ``Footprint`` instance.
@@ -1138,6 +1145,16 @@ def load_mod(tree: SExprNode) -> Footprint:
     Raises:
         KicadParseError: if the tree is not a valid footprint.
     """
+    upgraded = False
+    if board_version is None:
+        if needs_upgrade(tree):
+            tree = upgrade_footprint_tree(tree)
+            upgraded = True
+    elif sym_name(tree) in ("footprint", "module") and (
+        board_version < CURRENT_VERSION or sym_name(tree) == "module"
+    ):
+        tree = upgrade_footprint_tree(tree, version=board_version, board=True)
+        upgraded = True
     require_sym(tree, "footprint")
     ch = children(tree)
 
@@ -1339,6 +1356,11 @@ def load_mod(tree: SExprNode) -> Footprint:
         else:
             raise KicadParseError(f"Unknown token in footprint: {cname!r}")
 
+    if upgraded:
+        # A current-version file is kept as written, even one a generator wrote
+        # without the empty mandatory fields; KiCad adds them when it saves.
+        _add_mandatory_fields(properties)
+
     fp = Footprint(
         fp_id=fp_id,
         version=version,
@@ -1381,6 +1403,39 @@ def load_mod(tree: SExprNode) -> Footprint:
     )
 
     return fp
+
+
+# ``FOOTPRINT::FOOTPRINT`` (pcbnew/footprint.cpp:105-130) creates the four
+# mandatory fields before the parser runs: name, layer, visible.
+_MANDATORY_FIELDS = (
+    ("Reference", "F.SilkS", True),
+    ("Value", "F.Fab", True),
+    ("Datasheet", "F.Fab", False),
+    ("Description", "F.Fab", False),
+)
+
+
+def _add_mandatory_fields(properties: list[Property]) -> None:
+    """Add each mandatory field the file lacks, as KiCad holds and writes it.
+
+    KiCad writes every field it holds (``pcb_io_kicad_sexpr.cpp:1244-1256``), so
+    a footprint saved by KiCad always carries all four. The match is exact, as
+    ``FOOTPRINT::GetField`` is (``footprint.cpp:730-739``).
+    """
+    present = {prop.name for prop in properties}
+    for name, layer, visible in _MANDATORY_FIELDS:
+        if name not in present:
+            properties.append(
+                Property(
+                    name=name,
+                    value="",
+                    visible=visible,
+                    layer=layer,
+                    attributes=TextAttributes(),
+                    show_name=False,
+                    do_not_autoplace=False,
+                )
+            )
 
 
 def _load_attrs(node: SExprNode) -> FootprintAttrs:

@@ -1,0 +1,85 @@
+(footprint "kicad9_precision"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -2 0)
+		(layer "F.SilkS")
+		(uuid "11111111-1111-4111-8111-111111111111")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "kicad9_precision"
+		(at 0 2 0)
+		(layer "F.Fab")
+		(uuid "11111111-1111-4111-8111-111111111112")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "11111111-1111-4111-8111-111111111113")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "11111111-1111-4111-8111-111111111114")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "description" "a user field with a lower-case name"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "11111111-1111-4111-8111-111111111115")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_poly
+		(pts
+			(xy -7.845 -2.6) (xy -7.840694034 2.629028468) (xy -7.828146961 2.655557023)
+		)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "11111111-1111-4111-8111-111111111116")
+	)
+	(pad "1" thru_hole circle
+		(at 0 0)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(uuid "11111111-1111-4111-8111-111111111117")
+	)
+	(embedded_fonts no)
+)

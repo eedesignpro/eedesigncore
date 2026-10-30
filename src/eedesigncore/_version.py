@@ -13,4 +13,4 @@ is the fault UF-012 reported: a version that does not travel with the code.
 The release manager edits this file. Nothing else writes it.
 """
 
-__version__ = "0.39.0"
+__version__ = "0.40.0"

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.40.0] - 2026-10-30
+
+- Write footprint paths that KiCad 10 links. A board update wrote the root sheet uuid at the head of every path, so KiCad's Update PCB from Schematic offered to replace all 500 footprints of a test bed. A path now matches the netlist: the sheet uuids below the root, then the symbol uuid. A two-unit symbol takes KiCad's first unit uuid, and a path that already names any unit uuid stays. A 0.39.0 path still matches and is rewritten.
+- Write the footprint sheet name as the full sheet path, `/COILS/PREAMP S1C1/`, and the root as `/`.
+- Skip power symbols, and symbols on a sheet excluded from the board, in the PCB update. They blocked the plan with a missing-footprint error.
+- Write pad pin functions as `name_number` and pin types with `+no_connect` only under a no-connect marker, as the KiCad netlist does.
+- Move a placed footprint's zones, drawings, and points with its placement. A replaced footprint kept its keep-out at board 0,0, and DRC reported a library mismatch.
+- Read footprints from KiCad 5 to KiCad 9 the way KiCad 10 reads them: `module` files, unquoted numbers, `tstamp`, `(at x y unlocked)`, bare `hide` and `locked`, legacy arcs and widths, legacy properties, `fp_text` reference and value, and the pre-9.0 meaning of a zero margin. 537 of 538 older footprints of one user library now write the same as `kicad-cli fp upgrade`; the last differs only in the footprint name, which KiCad takes from the file name. A footprint inside an older board takes the board version.
+- Write `(remove_unused_layers no)` on every through-hole pad that has no setting, as KiCad does.
+- Match footprint field names exactly, as KiCad does. A user field named `description` took the place of the mandatory `Description`, and a 400-part board did not round-trip.
+- Join a net that carries a global label and a local label of one name to the global net. The merged net kept the local label's sheet path, so it split from the same global label on another sheet while coverage read complete.
+- Add `drawing=False` to `inspect_schematic_electrical` and `prepare_schematic_view`. The PCB and schematic update planners use it. With text resolution reused and fewer deep copies, a 46-sheet update plan takes 3.6 s, down from 10.5 s.
+- Keep every hidden field of a schematic or symbol library that KiCad 9 wrote, and write the KiCad 9 layout for a KiCad 9 file. A KiCad 9 schematic now round-trips byte for byte. (Listed under 0.38.0 before; it ships first in 0.40.0.)
+
 ## [0.39.0] - 2026-10-29
 
 - Add PCB updates from schematics and schematic updates from PCB footprints.

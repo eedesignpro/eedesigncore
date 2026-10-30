@@ -162,7 +162,13 @@ def run(
 
     # Phase 8. processSubGraphs (`:2291`). Same-sheet absorption, the weak-name
     # suffix, and sheet-pin promotion. Re-arms every survivor for propagation.
-    surviving = process(driver_subgraphs, resolve_alias=resolve_alias)
+    surviving = process(
+        driver_subgraphs,
+        resolve_alias=resolve_alias,
+        rename=lambda subgraph: _name_subgraph(
+            subgraph, prefixes.get(subgraph.sheet_path, "/"), resolve_alias
+        ),
+    )
     report.surviving_after_absorption = len(surviving)
 
     # Phase 9b. The global-name equivalence closure (`:2344-2452`). MUST run

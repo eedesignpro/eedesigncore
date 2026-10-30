@@ -22,7 +22,7 @@ fp = Footprint.from_file("C_0402_1005Metric.kicad_mod")
 fp.to_file("C_0402_1005Metric.kicad_mod")   # same bytes, empty git diff
 ```
 
-Three limits apply:
+Four limits apply:
 
 - The source file must be one that KiCad wrote. A file that another tool
   rewrote can come back in KiCad layout, and that gives a real diff.
@@ -30,6 +30,10 @@ Three limits apply:
   file at a time.
 - `.to_file` keeps the line endings of the source file. `.to_string` always
   returns line feeds.
+- A schematic or symbol library that KiCad 9 wrote comes back in the KiCad 9
+  layout, byte for byte. Raise its `version` to get the KiCad 10 layout.
+- A footprint file from KiCad 5 to KiCad 9 loads as KiCad 10 loads it, and
+  writes in the KiCad 10 format, as `kicad-cli fp upgrade` does.
 
 ## Supported files
 

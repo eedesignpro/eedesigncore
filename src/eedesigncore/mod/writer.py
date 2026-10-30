@@ -50,6 +50,7 @@ from eedesigncore.common.pcb_family import (
     ZoneKeepout,
     ZonePlacement,
 )
+from eedesigncore.common.pcb_family.enums import PadType
 from eedesigncore.common.pcb_family.ordering import (
     FootprintFrame,
     footprint_member_layer_sets,
@@ -588,10 +589,11 @@ def _dump_pad(pad: Pad, *, context: SaveContext = SaveContext.LIBRARY) -> str:
         layers_str = " ".join(_q(lyr) for lyr in pad.layers)
         parts.append(f"(layers {layers_str})")
 
-    # (remove_unused_layers yes|no) — for PTH pads: ALWAYS written
-    # In library context we always write it when it was in the file
-    if pad.remove_unused_layers is not None:
-        parts.append(f"(remove_unused_layers {_bool(pad.remove_unused_layers)})")
+    # (remove_unused_layers yes|no) — written for every PTH pad and no other
+    # (format(PAD*) :1793-1795). A pad read from a file older than the token
+    # holds None, which is KiCad's default, false.
+    if pad.pad_type is PadType.thru_hole:
+        parts.append(f"(remove_unused_layers {_bool(bool(pad.remove_unused_layers))})")
 
     # (keep_end_layers yes|no) — only when remove_unused_layers is True
     if pad.keep_end_layers is not None and pad.remove_unused_layers:

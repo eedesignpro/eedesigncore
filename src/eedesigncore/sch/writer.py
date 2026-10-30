@@ -29,6 +29,7 @@ from eedesigncore.common.sch_family.shapes import (
     SchPolyline,
     SchRect,
 )
+from eedesigncore.common.sch_family.versions import is_legacy_schematic as _is_legacy_schematic
 from eedesigncore.common.writers import (
     dump_bool as _bool,
 )
@@ -206,18 +207,33 @@ def _dump_instance_variant(variant: InstanceVariant) -> str:
     return " ".join(parts)
 
 
-def _dump_placed_property(prop: Property) -> str:
+def _dump_placed_property(prop: Property, *, legacy: bool = False) -> str:
     """Emit a placed-instance ``(property …)`` (``SCH_IO_KICAD_SEXPR::saveField``).
 
     Distinct from the ``.kicad_sym`` lib-cache field order: here ``(hide yes)`` is
     emitted (iff hidden) BEFORE ``(show_name)``/``(do_not_autoplace)`` (:1014-1019),
     and the angle uses ``FormatAngle`` (:1012). Effects follow when present.
+
+    *legacy* is the KiCad 9 layout (9.0.9 ``sch_io_kicad_sexpr.cpp:920-930``):
+    ``(show_name yes)`` and ``(do_not_autoplace yes)`` only when set, and
+    ``(hide yes)`` inside the effects block (``SCH_FIELD::Format``,
+    ``sch_field.cpp:580-582``). A hidden field always carries effects there,
+    because the hide token has nowhere else to go.
     """
     private_tok = "private " if prop.private else ""
     parts = [
         f"(property {private_tok}{_q(prop.name)} {_q(prop.value)}"
         f" (at {_fmt(prop.position[0])} {_fmt(prop.position[1])} {_fmt_angle(prop.angle)})"
     ]
+    if legacy:
+        if prop.show_name:
+            parts.append("(show_name yes)")
+        if prop.do_not_autoplace:
+            parts.append("(do_not_autoplace yes)")
+        if prop.attributes is not None or not prop.visible:
+            parts.append(_dump_field_effects(prop.attributes, hide=not prop.visible))
+        parts.append(")")
+        return " ".join(parts)
     if not prop.visible:
         parts.append("(hide yes)")
     parts.append(f"(show_name {_bool(prop.show_name)})")
@@ -238,7 +254,7 @@ def _dump_placed_pin(pin: PlacedSymbolPin) -> str:
     return " ".join(parts)
 
 
-def _dump_placed_symbol(sym: PlacedSymbol) -> str:
+def _dump_placed_symbol(sym: PlacedSymbol, *, legacy: bool = False) -> str:
     """Emit a placed ``(symbol …)`` instance node (saveSymbol :706-989).
 
     Field/emit order (embed-context Part 2b): optional ``(lib_name)``, ``(lib_id)``,
@@ -251,6 +267,10 @@ def _dump_placed_symbol(sym: PlacedSymbol) -> str:
     symbol writer already uses. Pins do NOT sort: ``GetRawPins`` hands the writer
     the raw vector (``sch_symbol.h:668``), so stored order is correct there
     (sweep section 3.3).
+
+    *legacy* is the KiCad 9 layout (9.0.9 ``sch_io_kicad_sexpr.cpp:725-733``):
+    ``(convert 2)`` in place of ``(body_style …)``, and only for the DeMorgan
+    body style, and no ``(in_pos_files)``.
     """
     parts = ["(symbol"]
     if sym.lib_name is not None:
@@ -260,18 +280,23 @@ def _dump_placed_symbol(sym: PlacedSymbol) -> str:
     if sym.mirror is not None:
         parts.append(f"(mirror {sym.mirror})")
     parts.append(f"(unit {sym.unit})")
-    parts.append(f"(body_style {sym.body_style})")
+    if legacy:
+        if sym.body_style == 2:
+            parts.append("(convert 2)")
+    else:
+        parts.append(f"(body_style {sym.body_style})")
     parts.append(f"(exclude_from_sim {_bool(sym.exclude_from_sim)})")
     parts.append(f"(in_bom {_bool(sym.in_bom)})")
     parts.append(f"(on_board {_bool(sym.on_board)})")
-    parts.append(f"(in_pos_files {_bool(sym.in_pos_files)})")
+    if not legacy:
+        parts.append(f"(in_pos_files {_bool(sym.in_pos_files)})")
     parts.append(f"(dnp {_bool(sym.dnp)})")
     if sym.fields_autoplaced:
         parts.append("(fields_autoplaced yes)")
     if sym.uuid is not None:
         parts.append(f"(uuid {_q(sym.uuid)})")
     for field in _sort_symbol_fields(sym.fields):
-        parts.append(_dump_placed_property(field))
+        parts.append(_dump_placed_property(field, legacy=legacy))
     for pin in sym.pins:
         parts.append(_dump_placed_pin(pin))
     if sym.instances:
@@ -371,12 +396,13 @@ def _dump_text(text: SchText) -> str:
     return " ".join(parts)
 
 
-def _dump_label(label: Label) -> str:
+def _dump_label(label: Label, *, legacy: bool = False) -> str:
     """Emit a label of any kind (``saveText`` :1405-1466).
 
     Order: token+text, ``(length)`` iff netclass_flag, ``(shape)`` iff
     global/hier/netclass, ``(at)``, ``(fields_autoplaced yes)`` iff set, effects,
-    uuid, then per-field ``(property …)`` blocks.
+    uuid, then per-field ``(property …)`` blocks. *legacy* selects the KiCad 9
+    field layout.
     """
     parts = [f"({label.kind.value} {_q(label.content)}"]
     if label.kind is LabelKind.netclass_flag and label.length is not None:
@@ -393,7 +419,7 @@ def _dump_label(label: Label) -> str:
     if label.uuid is not None:
         parts.append(f"(uuid {_q(label.uuid)})")
     for field in label.fields:
-        parts.append(_dump_placed_property(field))
+        parts.append(_dump_placed_property(field, legacy=legacy))
     parts.append(")")
     return " ".join(parts)
 
@@ -597,12 +623,13 @@ def _dump_per_sheet_instances(projects: list[SheetInstanceProject]) -> str:
     return " ".join(parts)
 
 
-def _dump_sheet(sheet: Sheet) -> str:
+def _dump_sheet(sheet: Sheet, *, legacy: bool = False) -> str:
     """Emit a ``(sheet …)`` sub-sheet node (``saveSheet`` :1069-1241).
 
     Order: ``(at)``, ``(size)``, the four bools, optional ``(fields_autoplaced yes)``,
     ``<stroke>`` (border), ``(fill (color …))`` (background), ``(uuid)``, fields, pins,
-    then the optional per-sheet ``(instances …)`` block.
+    then the optional per-sheet ``(instances …)`` block. *legacy* selects the
+    KiCad 9 field layout.
     """
     parts = [
         f"(sheet (at {_fmt(sheet.position[0])} {_fmt(sheet.position[1])})"
@@ -619,7 +646,7 @@ def _dump_sheet(sheet: Sheet) -> str:
     if sheet.uuid is not None:
         parts.append(f"(uuid {_q(sheet.uuid)})")
     for field in sheet.fields:
-        parts.append(_dump_placed_property(field))
+        parts.append(_dump_placed_property(field, legacy=legacy))
     for pin in sheet.pins:
         parts.append(_dump_sheet_pin(pin))
     if sheet.instances:
@@ -667,9 +694,10 @@ def _dump_lib_symbols(sch: Schematic) -> str:
     """
     from eedesigncore.sym.writer import _dump_symbol
 
+    legacy = _is_legacy_schematic(sch.version)
     parts = ["(lib_symbols"]
     for sym in _sort_schematic_lib_symbols(sch.lib_symbols):
-        parts.append(_dump_symbol(sym))
+        parts.append(_dump_symbol(sym, legacy=legacy))
     parts.append(")")
     return " ".join(parts)
 
@@ -696,6 +724,7 @@ def _dump_item_stream(sch: Schematic) -> list[str]:
     compare, so a plain string sort of the uuid text matches.
     """
     items: list[tuple[int, str, str]] = []
+    legacy = _is_legacy_schematic(sch.version)
 
     for shape in sch.graphic_shapes:
         items.append((_RANK_SHAPE, shape.id or "", _dump_graphic_shape(shape)))
@@ -712,7 +741,9 @@ def _dump_item_stream(sch: Schematic) -> list[str]:
     for line in sch.lines:
         items.append((_RANK_LINE, line.uuid or "", _dump_line(line)))
     for label in sch.labels:
-        items.append((_LABEL_RANK[label.kind], label.uuid or "", _dump_label(label)))
+        items.append(
+            (_LABEL_RANK[label.kind], label.uuid or "", _dump_label(label, legacy=legacy))
+        )
     for img in sch.images:
         items.append((_RANK_BITMAP, img.uuid or "", _dump_image(img)))
     for table in sch.tables:
@@ -720,13 +751,13 @@ def _dump_item_stream(sch: Schematic) -> list[str]:
     for ra in sch.rule_areas:
         items.append((_RANK_RULE_AREA, ra.shape.id or "", _dump_rule_area(ra)))
     for sym in sch.symbols:
-        items.append((_RANK_SYMBOL, sym.uuid or "", _dump_placed_symbol(sym)))
+        items.append((_RANK_SYMBOL, sym.uuid or "", _dump_placed_symbol(sym, legacy=legacy)))
     for group in sch.groups:
         # Empty groups are never written (saveGroup :1616-1617).
         if group.members:
             items.append((_RANK_GROUP, group.uuid or "", _dump_group(group)))
     for sheet in sch.sheets:
-        items.append((_RANK_SHEET, sheet.uuid or "", _dump_sheet(sheet)))
+        items.append((_RANK_SHEET, sheet.uuid or "", _dump_sheet(sheet, legacy=legacy)))
 
     items.sort(key=lambda t: (t[0], t[1]))
     return [text for _, _, text in items]

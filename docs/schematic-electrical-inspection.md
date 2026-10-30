@@ -2,7 +2,9 @@
 
 Import every operation and result type from `eedesigncore`.
 `inspect_schematic_electrical(source, document_id=..., instance="design")` accepts the same native sources as `prepare_schematic_view`.
-It reuses that preparation and connectivity calculation. It currently also prepares drawing geometry.
+It reuses that preparation and connectivity calculation. By default it also prepares drawing geometry.
+Pass `drawing=False` for electrical facts only. Nets, parts, pins, labels and resolved text stay the same; items carry no drawn bounds, and drawing coverage reads `unavailable`.
+The PCB and schematic update planners pass `drawing=False`. On a 46-sheet design that took one plan from 10.5 s to 3.6 s, with the text-resolution changes of 0.40.0.
 No second connectivity reader or saved PCB assignment source is involved.
 Use the same document and instance identifiers when comparing revisions.
 

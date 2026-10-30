@@ -153,6 +153,9 @@ class DocumentResolver:
             else {}
         )
         self.references: dict[str, tuple[Owner, TextResolutionContext, dict[str, Symbol]]] = {}
+        # Global label name -> (sheet path, page) for every global label in the
+        # hierarchy, built once per resolver and context (see ``intersheet``).
+        self._intersheet: dict[int, dict[str, list[tuple[str, str]]]] = {}
         if isinstance(source, Schematic):
             self.index(source, context)
         if context.hierarchy:
@@ -519,17 +522,22 @@ class DocumentResolver:
         prefix = settings.get("intersheets_ref_prefix", "[")
         suffix = settings.get("intersheets_ref_suffix", "]")
         name = Resolver(context).resolve(label.content).resolved
-        pages = []
-        for node in context.hierarchy.walk():
-            if not own and node.kiid_path == context.instance_path:
-                continue
-            scope = context_for_sheet(context.hierarchy, node.kiid_path, context=context)
-            if any(
-                item.kind.value == "global_label"
-                and Resolver(scope).resolve(item.content).resolved == name
-                for item in node.schematic.labels
-            ):
-                pages.append(node.page or "?")
+        # One pass over the hierarchy per context, not one per global label: a
+        # 46-sheet design has hundreds of global labels, and each pass resolves
+        # every global label of every sheet.
+        table = self._intersheet.get(id(context))
+        if table is None:
+            table = {}
+            for node in context.hierarchy.walk():
+                scope = context_for_sheet(context.hierarchy, node.kiid_path, context=context)
+                for item in node.schematic.labels:
+                    if item.kind.value == "global_label":
+                        resolved = Resolver(scope).resolve(item.content).resolved
+                        table.setdefault(resolved, []).append((node.kiid_path, node.page or "?"))
+            self._intersheet[id(context)] = table
+        pages = [
+            page for path, page in table.get(name, []) if own or path != context.instance_path
+        ]
         pages = sorted(
             set(pages), key=lambda page: (int(page) if page.isdigit() else 2147483647, page)
         )
@@ -672,8 +680,16 @@ class DocumentResolver:
             child_path = (context.instance_path or "").rstrip("/") + "/" + value.uuid
             if any(node.kiid_path == child_path for node in context.hierarchy.walk()):
                 context = context_for_sheet(context.hierarchy, child_path, context=context)
-        if isinstance(value, PlacedSymbol | Symbol | Footprint | Sheet | Label):
+        if isinstance(value, Footprint):
             owner = value.model_copy(deep=True)
+        elif isinstance(value, PlacedSymbol | Symbol | Sheet | Label):
+            # The owner keeps the raw field text while the walk below rewrites
+            # the fields in place. Only the fields change, so only they are
+            # copied: a deep copy of every library symbol's graphics made up
+            # most of the time of a large schematic.
+            owner = value.model_copy(
+                update={"fields": [field.model_copy() for field in value.fields]}
+            )
         local: dict[str, str] = {}
         layer = getattr(value, "layer", None)
         if isinstance(layer, str):

@@ -858,6 +858,10 @@ def load_pcb(tree: SExprNode) -> Board:
     trailing_drawings: list[PcbDrawItem] = []
     embedded_files: list[EmbeddedFile] = []
     seen_embedded_fonts = False
+    # A board footprint carries no version of its own; it takes the board's
+    # (parser 5156-5163). A board without one predates 20201115 (parser 1686).
+    version_node = find_child(tree, "version")
+    board_version = get_int(children(version_node)[0]) if version_node is not None else 20201115
 
     for child in children(tree):
         if child.node_type != SExprNodeType.LIST:
@@ -870,7 +874,7 @@ def load_pcb(tree: SExprNode) -> Board:
         elif cname in ("footprint", "module"):
             # `module` is the legacy alias for `footprint` (A2 Q6). The mod loader
             # already accepts board-context footprint tokens (uuid/at/path/nets).
-            footprints.append(load_mod(_rename_token(child, "footprint")))
+            footprints.append(load_mod(child, board_version=board_version))
         elif cname in _GR_TO_FP or cname in ("table", "dimension", "image", "barcode"):
             # A drawing appearing after (embedded_fonts …) is preserved in a
             # trailing stream re-emitted in that same position (ADR-034).

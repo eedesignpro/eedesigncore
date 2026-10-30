@@ -273,6 +273,11 @@ def _load_placed_symbol(node: SExprNode) -> PlacedSymbol:
             unit = _get_int(cc[0])
         elif cname == "body_style":
             body_style = _get_int(cc[0])
+        elif cname == "convert":
+            # KiCad 9 spelling of body_style, DeMorgan only (9.0.9
+            # sch_io_kicad_sexpr.cpp:727-728). The parser there reads it the
+            # same way (``parseSchematicSymbol``, parser.cpp:3105-3110).
+            body_style = _get_int(cc[0])
         elif cname == "exclude_from_sim":
             exclude_from_sim = _bool_token(child)
         elif cname == "in_bom":

@@ -40,6 +40,31 @@ print(fp.properties[0].name, fp.properties[1].value)
 
 A bare `Footprint(fp_id=...)` writes no Reference and no Value.
 
+## Older files
+
+A footprint file older than the current format, including a KiCad 5
+`module` file, loads the way KiCad 10 loads it. `eedesigncore.mod.legacy`
+rewrites the parse tree first, and each rule cites the KiCad 10 parser. Among
+the rules:
+
+- `fp_text reference` and `fp_text value` become the Reference and Value
+  fields. A hidden user text becomes a user field named `Field<n>`.
+- The four mandatory fields are added when the file lacks them.
+- `tstamp` is the uuid, `(at x y unlocked)` is `(unlocked yes)`, and a bare
+  `hide` or `locked` is `(hide yes)` or `(locked yes)`.
+- Legacy arcs, `(width)` strokes, the old fill flags, inch 3D offsets and
+  `~...~` overbars convert. A zero margin before 9.0 means "inherit".
+- A library footprint drops its lock and its position. KiCad clears both
+  outside a board.
+
+A current file is kept as written. The writer then writes the KiCad 10
+format, so `to_file` upgrades the file. On 538 older footprints of one user
+library, the output equals `kicad-cli fp upgrade` apart from KiCad's random
+uuids and, for five files, the footprint name: KiCad takes the name from the
+file name.
+
+A footprint inside a board has no version of its own. It takes the board's.
+
 ## Pad order
 
 The writer sorts pads the way KiCad sorts them at save. Keys, in sequence:

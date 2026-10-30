@@ -26,7 +26,7 @@ The writer sorts properties by an ordinal the file never stores.
 |---|---|
 | Symbol mandatory: Reference, Value, Footprint, Datasheet, Description | 1 to 5, by name, case-insensitive |
 | Symbol user field | 42 upward, in file position order |
-| Footprint mandatory: Reference, Value, Datasheet, Description | 0 to 3, by name, case-insensitive |
+| Footprint mandatory: Reference, Value, Datasheet, Description | 0 to 3, by exact name (`FOOTPRINT::GetField`) |
 | Footprint user field | after the mandatory four, in file position order |
 
 Two consequences. A mandatory field leads wherever the file put it. Editing

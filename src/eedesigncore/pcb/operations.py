@@ -44,6 +44,7 @@ from eedesigncore.pcb.transform import (
     rotate_board,
     set_footprint_orientation,
     translate_board,
+    translate_footprint,
 )
 from eedesigncore.tables.resolver import ResolvedLibTable, qualify_item_name
 
@@ -114,6 +115,12 @@ def extract_footprint(
     # the board placement baked into its pad and text angles.
     if fp.at is not None:
         set_footprint_orientation(fp, 0.0)
+        # Back to the library origin: board-frame children (zones, point markers,
+        # embedded dimensions) carry board coordinates and follow the position
+        # (pcbnew/footprint.cpp:3002-3021), as when the footprint editor loads a
+        # board footprint at the origin.
+        x, y = fp.at.position
+        translate_footprint(fp, (-x, -y))
     fp.at = None
     # Step 5 STRIP (path) (:1267-1268)
     fp.path = None
@@ -229,7 +236,13 @@ def inject_footprint(
     # label turned wrongly, which a plot shows and a resave does not. See
     # context/audit/footprint-transform-frame-2026-09-02.md. This is
     # SetOrientation, the exact inverse of what extract_footprint applies.
-    placed.at = FootprintPlacement(position=at, angle=0.0)
+    # FOOTPRINT::SetPosition moves the footprint's board-frame children with it:
+    # every zone, point marker and embedded dimension (pcbnew/footprint.cpp:
+    # 3002-3021). A library file stores them about the origin, so they take the
+    # placement offset here; otherwise a keep-out lands at board 0,0.
+    start = placed.at.position if placed.at is not None else (0.0, 0.0)
+    placed.at = FootprintPlacement(position=start, angle=0.0)
+    translate_footprint(placed, (at[0] - start[0], at[1] - start[1]))
     if rotation != 0.0:
         set_footprint_orientation(placed, rotation)
 
