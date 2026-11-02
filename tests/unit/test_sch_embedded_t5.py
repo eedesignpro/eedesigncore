@@ -145,12 +145,17 @@ class TestSymWriterLibraryInert:
         it. ``by_name`` exists only so a derived symbol can materialize its parent's
         keywords and filters, which ``LIB_SYMBOL::GetKeyWords`` and
         ``GetFPFilters`` do at save time (``lib_symbol.h:179-188,211-220``).
+
+        The keyword-only ``legacy`` switch selects the KiCad 9 token layout from
+        the file version. It carries no context and no lib id either.
         """
         signature = inspect.signature(_dump_symbol)
         params = list(signature.parameters)
-        assert params == ["sym", "by_name"], f"unexpected sym-writer signature: {params}"
+        expected = ["sym", "by_name", "legacy"]
+        assert params == expected, f"unexpected sym-writer signature: {params}"
         by_name = signature.parameters["by_name"]
         assert by_name.kind is inspect.Parameter.KEYWORD_ONLY
+        assert signature.parameters["legacy"].kind is inspect.Parameter.KEYWORD_ONLY
         assert by_name.default is None
         for banned in ("context", "lib_id"):
             assert banned not in params

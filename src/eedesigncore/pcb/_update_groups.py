@@ -7,7 +7,12 @@ from collections import defaultdict
 from eedesigncore.common.pcb_family import PcbGroup
 from eedesigncore.common.uuid_ops import _iter_models
 from eedesigncore.pcb.models import Board
-from eedesigncore.project._update_common import issue, sources, symbol_path
+from eedesigncore.project._update_common import (
+    accepted_footprint_paths,
+    issue,
+    sources,
+    symbol_path,
+)
 from eedesigncore.project.hierarchy import SheetHierarchy
 from eedesigncore.project.update_models import DesignUpdateChange, DesignUpdateIssue
 from eedesigncore.sch.models import Group, Schematic
@@ -56,7 +61,8 @@ def transfer_groups(
     touched: set[str] = set()
     for reference, ids in parts.items():
         paths = {symbol_path(inspection, key) for key in ids}
-        footprint = next((fp for fp in board.footprints if fp.path in paths), None)
+        links = accepted_footprint_paths(source, inspection, ids)
+        footprint = next((fp for fp in board.footprints if fp.path in links), None)
         if footprint is None or footprint.uuid is None:
             continue
         groups = {group.uuid: group for path in paths for group in membership[path]}

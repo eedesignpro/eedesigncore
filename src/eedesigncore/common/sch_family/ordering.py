@@ -316,13 +316,27 @@ def _alternate_key(alternate: PinAlternate) -> str:
     return alternate.name
 
 
-def _compare_pins(first: Pin, second: Pin) -> int:
+def _compare_pins(first: Pin, second: Pin, *, legacy: bool = False) -> int:
     """Port of ``SCH_PIN::compare`` for a library pin (``eeschema/sch_pin.cpp:1725-1818``).
 
     The number comparison returns its result even when it is zero, exactly as the
     C++ does. So ``"01"`` and ``"1"`` compare equal and never reach the position
     keys.
+
+    *legacy* is the KiCad 9 order (9.0.9 ``eeschema/sch_pin.cpp:1889-1908``):
+    there ``SCH_PIN::compare`` does not pass ``SKIP_TST_POS``, so
+    ``SCH_ITEM::compare`` ranks the pins on position (x, then internal y)
+    BEFORE the number. KiCad 10 added the flag and moved position after the
+    number.
     """
+    if legacy:
+        position_first = _point_iu(first.position)
+        position_second = _point_iu(second.position)
+        if position_first[0] != position_second[0]:
+            return int32(position_first[0] - position_second[0])
+        if position_first[1] != position_second[1]:
+            return int32(position_first[1] - position_second[1])
+
     if first.number != second.number:
         return str_num_cmp(first.number, second.number)
 
@@ -390,7 +404,7 @@ def _compare_pins(first: Pin, second: Pin) -> int:
     return 0
 
 
-def compare_draw_items(first: Any, second: Any) -> int:
+def compare_draw_items(first: Any, second: Any, *, legacy: bool = False) -> int:
     """Compare two draw items as ``SCH_ITEM::operator<`` orders them.
 
     Key order (``eeschema/sch_item.cpp:691-742``): type rank, then the private
@@ -409,7 +423,7 @@ def compare_draw_items(first: Any, second: Any) -> int:
         return 1 if private_first else -1
 
     if rank_first == _RANK_PIN:
-        return _compare_pins(first, second)
+        return _compare_pins(first, second, legacy=legacy)
 
     if rank_first == _RANK_UNKNOWN:
         return 0
@@ -433,14 +447,18 @@ def compare_draw_items(first: Any, second: Any) -> int:
 # ---------------------------------------------------------------------------
 
 
-def sort_draw_items(items: list[Any]) -> list[Any]:
+def sort_draw_items(items: list[Any], *, legacy: bool = False) -> list[Any]:
     """Return the draw items of one unit block in KiCad save order.
 
     Mirrors the ``std::multiset`` at ``sch_io_kicad_sexpr_lib_cache.cpp:507-520``.
     The sort is stable, so items that tie on every persisted key keep their
-    encounter order (audit C-3).
+    encounter order (audit C-3). *legacy* selects the KiCad 9 pin order.
     """
-    return sorted(items, key=cmp_to_key(compare_draw_items))
+
+    def _compare(first: Any, second: Any) -> int:
+        return compare_draw_items(first, second, legacy=legacy)
+
+    return sorted(items, key=cmp_to_key(_compare))
 
 
 def sort_units(units: list[SymbolUnit]) -> list[SymbolUnit]:

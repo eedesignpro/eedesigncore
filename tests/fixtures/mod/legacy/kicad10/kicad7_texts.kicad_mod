@@ -1,0 +1,134 @@
+(footprint "kicad7_texts"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "KiCad 7 text syntax")
+	(property "Reference" "REF**"
+		(at 0 -2.54 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "178de9d9-fcca-45d6-b17c-9b4cb9c37fea")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "kicad7_texts"
+		(at 0 2.54 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "61879c4c-5e54-4f2e-a8cf-8f0e6398f814")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "8afdd653-d8c0-421c-9681-c961baa08df4")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" "A legacy symbol description"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b31736b0-1e77-4139-82a4-295d5ea18038")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "LCSC" "C12345"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "23f3ea23-2528-44c2-bc75-b24be3a90443")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Field5" "${REFERENCE}"
+		(at 0 3.81 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "8c1031c8-42bf-46a4-9a1f-f878f957187b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(private_layers "Dwgs.User" "Edge.Cuts")
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -1 -1)
+		(end 1 1)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.CrtYd")
+		(uuid "9067ecc5-b57f-46e7-b42d-c0abc782d211")
+	)
+	(fp_line
+		(start 0 -1.27)
+		(end 0 1.27)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "9067ecc5-b57f-46e7-b42d-c0abc782d210")
+	)
+	(fp_circle
+		(center 0 0)
+		(end 0 -1.27)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "4b97cb5f-e0be-4191-bc71-4052109b9666")
+	)
+	(fp_text user "visible"
+		(at 0 5 180)
+		(layer "F.Fab")
+		(uuid "02191ef4-ff8b-4520-a026-c6b92f4bcbcd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left)
+		)
+	)
+	(pad "1" thru_hole rect
+		(at 0 0)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "4b97cb5f-e0be-4191-bc71-4052109b9667")
+	)
+	(embedded_fonts no)
+)

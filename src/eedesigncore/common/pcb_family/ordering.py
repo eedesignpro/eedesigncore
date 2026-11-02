@@ -123,10 +123,10 @@ _DIMENSION_TYPE_RANK: dict[DimensionType, int] = {
 # (``pcb_io_kicad_sexpr_parser.cpp:5159-5166``); this library keeps it, so it
 # ranks as a user field.
 _MANDATORY_FOOTPRINT_FIELD_RANK: dict[str, int] = {
-    "reference": 1,
-    "value": 2,
-    "datasheet": 3,
-    "description": 4,
+    "Reference": 1,
+    "Value": 2,
+    "Datasheet": 3,
+    "Description": 4,
 }
 
 # Every user field ranks after every mandatory one.
@@ -807,10 +807,11 @@ def footprint_field_rank(name: str, user_index: int) -> int:
     Description in that order, and the parser fills a matching field in place or
     appends a new user field (``pcb_io_kicad_sexpr_parser.cpp:5167-5182``). So the
     four mandatory names always lead, whatever the file order, and user fields
-    follow in file order. The name match is case-insensitive, as
-    ``FOOTPRINT::HasField`` is.
+    follow in file order. The name match is exact, as ``FOOTPRINT::GetField``
+    is (``footprint.cpp:730-739``): a user field named ``description`` stays a
+    user field. The schematic parser, unlike this one, matches without case.
     """
-    mandatory = _MANDATORY_FOOTPRINT_FIELD_RANK.get(name.casefold())
+    mandatory = _MANDATORY_FOOTPRINT_FIELD_RANK.get(name)
     if mandatory is not None:
         return mandatory
     return _USER_FIELD_RANK_BASE + user_index

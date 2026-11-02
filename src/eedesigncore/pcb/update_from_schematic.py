@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 from collections.abc import Mapping
 from uuid import uuid4
 
-from eedesigncore.common.pcb_family import ComponentClasses
+from eedesigncore.common.pcb_family import ComponentClasses, FootprintUnitInfo
 from eedesigncore.common.uuid_ops import _iter_models
 from eedesigncore.mod.models import Footprint, FootprintPlacement
 from eedesigncore.pcb._update_footprints import replace_or_add, stable_ids
@@ -15,7 +15,9 @@ from eedesigncore.pcb._update_metadata import unit_information, update_metadata
 from eedesigncore.pcb.models import Board
 from eedesigncore.pcb.nets import rename_nets
 from eedesigncore.project._update_common import (
+    board_sheet_name,
     field_value,
+    footprint_path,
     issue,
     match_footprints,
     part_groups,
@@ -35,7 +37,54 @@ from eedesigncore.project.update_models import (
     PcbUpdateResult,
 )
 from eedesigncore.sch.models import Schematic
-from eedesigncore.schematic_view.inspection import inspect_schematic_electrical
+from eedesigncore.schematic_view.inspection import (
+    SchematicElectricalSnapshot,
+    inspect_schematic_electrical,
+)
+from eedesigncore.schematic_view.models import ViewItem
+
+
+def _pin_function(name: str | None, number: str) -> str:
+    """The pad ``pinfunction`` KiCad's netlist carries for one pin.
+
+    ``netlist_exporter_xml.cpp:1322-1325``: the shown pin name, an underscore and
+    the pin number, or nothing when the pin has no name. ``~`` shows as no name.
+    """
+    shown = "" if name in (None, "", "~") else name
+    return f"{shown}_{number}" if shown else ""
+
+
+def _pin_type(
+    pin: ViewItem,
+    inspection: SchematicElectricalSnapshot,
+    net_pins: Mapping[str, list[ViewItem]],
+) -> str:
+    """The pad ``pintype``: the pin type, plus ``+no_connect`` under KiCad's rule.
+
+    ``netlist_exporter_xml.cpp:1200-1206, 1327-1338``: the suffix needs a
+    no-connect marker on the net, and the net must hold one pin or only stacked
+    pins of one symbol. A pin of type no_connect owns the subgraph's no-connect
+    slot itself, so a marker on it adds no suffix (``no_connect`` stays plain).
+    """
+    base = pin.electrical_type or ""
+    if base == "no_connect" or pin.id not in inspection.no_connect_pins:
+        return base
+    members = [item for key in pin.net_ids for item in net_pins.get(key, [])]
+    first = members[0] if members else pin
+    stacked = all(
+        item.parent_item == first.parent_item
+        and item.position == first.position
+        and item.pin_name == first.pin_name
+        for item in members
+    )
+    return base + "+no_connect" if len(members) <= 1 or stacked else base
+
+
+def _same_units(first: FootprintUnitInfo, second: FootprintUnitInfo) -> bool:
+    return len(first.units) == len(second.units) and all(
+        a.name == b.name and Counter(a.pins) == Counter(b.pins)
+        for a, b in zip(first.units, second.units, strict=True)
+    )
 
 
 def _run(
@@ -52,12 +101,12 @@ def _run(
     validate_inputs(board, source, issues)
     if issues:
         return PcbUpdateResult(board=result, changes=changes, issues=issues)
-    inspection = inspect_schematic_electrical(source, document_id="pcb-update")
+    inspection = inspect_schematic_electrical(source, document_id="pcb-update", drawing=False)
     if inspection.coverage.electrical != "complete":
         issue(issues, "electrical_coverage", "Complete schematic electrical coverage is required.")
     groups = part_groups(inspection, issues, source)
     matching = match_footprints(
-        result.footprints, groups, inspection, options.match_by_reference, issues
+        result.footprints, groups, inspection, options.match_by_reference, issues, source
     )
     originals = {fp.uuid: fp for fp in board.footprints}
     if any(count > 1 for key, count in Counter(fp.uuid for fp in board.footprints).items() if key):
@@ -69,6 +118,11 @@ def _run(
         item.pads = []
     selected: set[str | None] = set()
     targets: dict[str, set[str]] = defaultdict(set)
+    net_pins: dict[str, list[ViewItem]] = defaultdict(list)
+    for view_item in inspection.items.values():
+        if view_item.kind == "pin":
+            for key in view_item.net_ids:
+                net_pins[key].append(view_item)
     expected: dict[tuple[str, int], str] = {}
     for reference, ids in groups.items():
         part = inspection.parts[ids[0]]
@@ -162,8 +216,9 @@ def _run(
             fp = old
         selected.add(fp.uuid)
         before = fp.model_dump_json()
-        fp.path = path
+        fp.path, link_sheet = footprint_path(source, inspection, ids, fp.path)
         source_symbol = symbols[path][1]
+        previous_units = fp.unit_info.model_copy(deep=True) if fp.unit_info else None
         update_metadata(fp, sheets[symbols[path][0]], source_symbol)
         for part_id in ids:
             unit_path = symbol_path(inspection, part_id)
@@ -175,6 +230,11 @@ def _run(
                 and unit_symbol.unit <= len(fp.unit_info.units)
             ):
                 fp.unit_info.units[unit_symbol.unit - 1] = unit_data.units[unit_symbol.unit - 1]
+        # KiCad orders a unit's pins with an unstable sort on position
+        # (lib_symbol.cpp:1218-1237), so pins that share a position have no
+        # recorded order. Keep the board's order when the pin sets agree.
+        if fp.unit_info and previous_units and _same_units(previous_units, fp.unit_info):
+            fp.unit_info = previous_units
         classes = sorted(
             {inspection.parts[key].fields.get("Component Class", "") for key in ids} - {""}
         )
@@ -203,16 +263,18 @@ def _run(
                 if field.name in part.fields
                 or field.name in {"Reference", "Value", "Datasheet", "Description"}
             ]
+        # Sheetname is the netlist (names …) value and Sheetfile the file name of
+        # the sheet (board_netlist_updater.cpp:663-705).
+        fp.sheetname = board_sheet_name(source, link_sheet)
         source_node = (
             next(
-                (node for node in source.walk() if node.kiid_path == path.rsplit("/", 1)[0]),
+                (node for node in source.walk() if node.kiid_path.rstrip("/") == link_sheet),
                 None,
             )
             if isinstance(source, SheetHierarchy)
             else None
         )
         if source_node is not None:
-            fp.sheetname = source_node.name
             fp.sheetfile = source_node.path.name
         if options.update_pad_nets:
             pins: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
@@ -235,9 +297,8 @@ def _run(
                 pins[pin.pin_number].append(
                     (
                         next(iter(names)) or "",
-                        pin.pin_name or "",
-                        (pin.electrical_type or "")
-                        + ("+no_connect" if pin.id in inspection.no_connect_pins else ""),
+                        _pin_function(pin.pin_name, pin.pin_number),
+                        _pin_type(pin, inspection, net_pins),
                     )
                 )
             for number in pins.keys() - {pad.number for pad in fp.pads}:
@@ -308,7 +369,7 @@ def _run(
                 expected[(fp.uuid or "", index)] = name
                 pad.net_name = name or None
                 pad.net_code = None
-                pad.pinfunction = entries[0][1] if entries else None
+                pad.pinfunction = (entries[0][1] or None) if entries else None
                 pad.pintype = entries[0][2] if entries else None
         if before != fp.model_dump_json():
             changes.append(

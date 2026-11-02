@@ -44,7 +44,12 @@ def _classify_atom(token: str) -> SExprNode:
         # Preserve -0 as DOUBLE with raw="-0" to round-trip KiCad's -0.0 output.
         if token == "-0":
             return SExprNode.double(-0.0, raw="-0")
-        return SExprNode.integer(int(token))
+        node = SExprNode.integer(int(token))
+        if token != str(node.value):
+            # "0805" is a number to the lexer and text to a text field: keep
+            # the spelling for a reader that takes the atom as text.
+            node.raw = token
+        return node
     if re.fullmatch(r"-?[0-9]*\.[0-9]*(?:[eE][+-]?[0-9]+)?", token):
         # Store raw text for lossless round-trip
         return SExprNode.double(float(token), raw=token)

@@ -113,6 +113,29 @@ path. Two consequences.
   token: the library carries no dirty tracking, so a discarded token would
   disappear from every file it saves, KiCad-written files included.
 
+## KiCad 9 files
+
+A schematic that KiCad 9 wrote carries `(version 20250114)` or lower. The
+writer keeps that version and writes the KiCad 9 layout, so the round trip
+stays byte-identical. The switch is `is_legacy_schematic` in
+`src/eedesigncore/common/sch_family/versions.py`; a `.kicad_sym` at `20241209` or lower takes
+the same path through `is_legacy_symbol_lib`.
+
+The KiCad 9 layout differs in five tokens and one order:
+
+- A field's `(hide yes)` sits inside `(effects …)`, after `(justify …)`. The
+  loader folds it into `Property.visible` either way.
+- `(show_name)` and `(do_not_autoplace)` appear only when set: bare in a
+  library symbol, `(show_name yes)` on a placed field.
+- No `(in_pos_files …)` and no `(duplicate_pin_numbers_are_jumpers …)`.
+- A power symbol writes `(power)`. The loader reads it as a global power type.
+- A placed symbol writes `(convert 2)` for the DeMorgan body style and nothing
+  for the base style, in place of `(body_style …)`.
+- Library pins sort on position before pin number.
+
+Set `version` to a KiCad 10 value and the same model writes the KiCad 10
+layout with every hidden field intact.
+
 ## Gaps in this scope
 
 - No electrical rule checking. `prepare_schematic_view` reports which net each

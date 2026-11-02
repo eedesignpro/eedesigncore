@@ -106,8 +106,46 @@ def prepare_schematic_view(
     strict: bool = True,
     font: SymbolFont | None = None,
     text_context: TextResolutionContext | None = None,
+    drawing: bool = True,
 ) -> SchematicView:
-    """Copy native sheets into portable pages with occurrence-qualified navigation."""
+    """Copy native sheets into portable pages with occurrence-qualified navigation.
+
+    With *drawing* false no page is rendered: each page keeps an empty SVG, its
+    drawing coverage reads ``unavailable`` with the issue
+    ``drawing_not_requested``, and no item carries drawn bounds. Nets, parts,
+    labels and resolved text are unchanged. A caller that needs only electrical
+    facts saves the render, about a third of the time on a large design.
+    """
+    return _prepare_schematic_view(
+        source,
+        document_id=document_id,
+        instance=instance,
+        sheet_bounds=sheet_bounds,
+        strict=strict,
+        font=font,
+        text_context=text_context,
+        drawing=drawing,
+    )
+
+
+def _prepare_schematic_view(
+    source: str | Path | Schematic | SheetHierarchy,
+    *,
+    document_id: str,
+    instance: str = "design",
+    sheet_bounds: dict[str, ViewBounds] | None = None,
+    strict: bool = True,
+    font: SymbolFont | None = None,
+    text_context: TextResolutionContext | None = None,
+    drawing: bool = True,
+    resolved_sheets: dict[str, Schematic] | None = None,
+) -> SchematicView:
+    """Build the view; fill *resolved_sheets* with each occurrence's resolved sheet.
+
+    The electrical inspection reads the resolved symbols and labels again. It
+    takes them from *resolved_sheets* rather than resolve every sheet's text a
+    second time.
+    """
     if isinstance(source, str | Path):
         if is_remote_uri(str(source)):
             raise ValueError("Schematic preparation requires a local source path.")
@@ -185,7 +223,8 @@ def prepare_schematic_view(
     pages: dict[str, SchematicPage] = {}
     roots: list[str] = []
     for path, sheet, name, parent, children in entries:
-        sheet = sheet.model_copy(deep=True)
+        # ``resolve_document_text`` works on its own copy and leaves *sheet* as
+        # it is, so no second copy is needed here.
         text_scope = text_context or TextResolutionContext()
         if isinstance(source, SheetHierarchy):
             text_scope = context_for_sheet(source, path, context=text_scope)
@@ -193,6 +232,8 @@ def prepare_schematic_view(
             text_scope = replace(text_scope, instance_path=path)
         resolved_text = resolve_document_text(sheet, text_scope)
         sheet = resolved_text.document
+        if resolved_sheets is not None:
+            resolved_sheets[path] = sheet
         page_id = view_identity(document_id, instance, "sheet", path)
         items: dict[str, ViewItem] = {}
         symbol_ids: dict[int, str] = {}
@@ -392,21 +433,35 @@ def prepare_schematic_view(
             )
         )
         page.coverage.drawing = "partial"
-        try:
-            page.svg = _render_schematic_svg(sheet, view_box=window, font=font, metadata=metadata)
-        except ValueError as error:
+        if not drawing:
             page.coverage.drawing = "unavailable"
             page.coverage.issues.append(
                 SchematicIssue(
-                    code="drawing_unavailable",
+                    code="drawing_not_requested",
                     scope="drawing",
-                    status="unsupported",
-                    message=str(error),
+                    status="omitted",
+                    message="The caller asked for electrical facts only; no page was drawn.",
                     sheet_path=path,
                 )
             )
-            metadata.bounds.clear()
-            metadata.bodies.clear()
+        else:
+            try:
+                page.svg = _render_schematic_svg(
+                    sheet, view_box=window, font=font, metadata=metadata
+                )
+            except ValueError as error:
+                page.coverage.drawing = "unavailable"
+                page.coverage.issues.append(
+                    SchematicIssue(
+                        code="drawing_unavailable",
+                        scope="drawing",
+                        status="unsupported",
+                        message=str(error),
+                        sheet_path=path,
+                    )
+                )
+                metadata.bounds.clear()
+                metadata.bodies.clear()
         for key, box in metadata.bounds.items():
             page.items[key].bounds = ViewBounds(
                 x=box.min_x,

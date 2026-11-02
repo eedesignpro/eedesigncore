@@ -86,7 +86,7 @@ def emit_flat(node: SExprNode) -> str:
         return f'"{_escape_string(node.value)}"'
     elif node.node_type == SExprNodeType.INTEGER:
         assert isinstance(node.value, int)
-        return str(node.value)
+        return node.raw if node.raw is not None else str(node.value)
     elif node.node_type == SExprNodeType.DOUBLE:
         assert isinstance(node.value, float)
         return _format_double(node.value, node.raw)

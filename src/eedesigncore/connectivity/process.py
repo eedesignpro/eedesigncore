@@ -34,6 +34,8 @@ the outcome through the item set and the name, never through subgraph identity.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from eedesigncore.connectivity.bus import AliasResolver, ConnectionType
 from eedesigncore.connectivity.connection import (
     MemberConn,
@@ -203,12 +205,19 @@ def _link(links: list[BusNeighborLink], member: MemberConn, other: Subgraph) -> 
 
 
 def process(
-    driver_subgraphs: list[Subgraph], *, resolve_alias: AliasResolver | None = None
+    driver_subgraphs: list[Subgraph],
+    *,
+    resolve_alias: AliasResolver | None = None,
+    rename: Callable[[Subgraph], None] | None = None,
 ) -> list[Subgraph]:
     """Run phase 8 and return the subgraphs that survive absorption.
 
     Ports the main loop at ``:1903-2221`` and the follow-up re-resolution at
     ``:2225-2240``, minus the two deliberate omissions in the module docstring.
+
+    *rename* configures a subgraph's driver connection from its new driver, as
+    the tail of ``ResolveDrivers`` does (`:274-280`). The pipeline passes the
+    function that phase 4 used, so both name forms follow the new driver.
     """
     # Step 1. Group by sheet (`:1898-1899`). Absorption only ever happens within
     # one sheet, so this is what bounds the candidate search.
@@ -318,11 +327,18 @@ def process(
 
     # Step 3. Re-resolve any subgraph that grew, over its now larger driver set
     # (`:2225-2240`). This pass does not trigger further absorption.
+    #
+    # ``ResolveDrivers`` ends by configuring the driver connection from the new
+    # driver, so the QUALIFIED name moves with it. Setting only the short name
+    # left a merged net with a global and a local label under the local label's
+    # sheet path, which then never joined the global net on another sheet.
     for subgraph in invalidated:
         if not subgraph.absorbed:
             kept_name = subgraph.name
             resolve(subgraph)
             if not subgraph.name:
                 subgraph.name = kept_name
+            elif rename is not None:
+                rename(subgraph)
 
     return [s for s in driver_subgraphs if not s.absorbed]

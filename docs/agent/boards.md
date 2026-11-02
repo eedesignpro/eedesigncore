@@ -44,9 +44,8 @@ The library assigns no nets and does not work out board copper connectivity.
 ## File version
 
 `Board.version` defaults to `20260206`, the KiCad 10.0.3 board format. No
-loader rejects a file by version. An older file usually raises
-`KicadParseError` on the first token this library does not model. Treat that
-as an out-of-range file, not as a bug.
+loader rejects a file by version. An older board's footprints load; other old
+tokens raise `KicadParseError`. Treat that as out of range.
 
 `scripts/corpus_test.py --root <folder>` round-trips every KiCad file in a
 folder you supply. It grades only files at the target version and reports the

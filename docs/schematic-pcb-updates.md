@@ -108,6 +108,24 @@ All controls belong to `PcbUpdateOptions`.
 
 Filters, jumper metadata, unit metadata, component-class fields, and associations update with the physical part.
 A hierarchy also supplies the sheet name and file name.
+
+### What KiCad 10 needs to link a footprint
+
+The update writes what KiCad 10's Update PCB from Schematic writes, so KiCad links every footprint afterwards.
+
+- The footprint path is the netlist sheet path, the sheet uuids below the root, then a symbol uuid. With one top-level sheet the root uuid is left out.
+- KiCad links a footprint on any unit uuid. A path that already names one stays. A new path takes KiCad's first netlist unit: for two units, the unit with the higher uuid.
+- For three or more units KiCad orders the units by an R-tree, which this library does not reproduce. A new path then still links, but it can name another unit than KiCad would.
+- A 0.39.0 path, with the root uuid at its head, still matches and is rewritten.
+- The sheet name is the full sheet path, `/COILS/PREAMP S1C1/`; the root sheet is `/`.
+- A power symbol, or any reference that starts with `#`, gets no footprint. Nor does a symbol on a sheet that is excluded from the board.
+- A pad pin function is the shown pin name, an underscore and the pin number. A pin type takes `+no_connect` only under a no-connect marker on a net of that pin alone.
+- A replaced footprint's zones, drawings and points move with its placement.
+
+`tests/unit/test_board_update_kicad_parity.py` cites the KiCad source for each rule.
+On a 508-part test bed, KiCad 10 links all 508 footprints after an update, and every pad net, pin function and pin type equals the kicad-cli netlist.
+
+The planner reads the schematic without its drawing. On a 46-sheet design a plan takes about 4 s.
 The helper combines units into one physical part by their saved instance reference.
 Conflicting unit assignments block the update.
 

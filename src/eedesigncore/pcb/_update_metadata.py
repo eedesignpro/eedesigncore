@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from eedesigncore.common.pcb_family import ComponentClasses, FootprintGateUnit, FootprintUnitInfo
+from eedesigncore.common.sch_family.ordering import resolve_symbol_definition
 from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.common.sch_family.symbol import join_fp_filters
 from eedesigncore.mod.models import Footprint
@@ -30,8 +31,10 @@ def update_metadata(footprint: Footprint, schematic: Schematic, placed: PlacedSy
 
 def unit_information(schematic: Schematic, placed: PlacedSymbol) -> FootprintUnitInfo:
     definitions = {definition.name: definition for definition in schematic.lib_symbols}
-    definition = flatten_definition(
-        definitions[placed.lib_name or placed.lib_id], definitions, placed.lib_id
+    # Units and pins live on the root of an inherited symbol, and this only
+    # reads them, so it takes the root itself and not a flattened deep copy.
+    definition, _fields = resolve_symbol_definition(
+        definitions[placed.lib_name or placed.lib_id], definitions
     )
     units: list[FootprintGateUnit] = []
     for number in range(

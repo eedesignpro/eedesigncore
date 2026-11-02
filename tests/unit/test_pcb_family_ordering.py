@@ -386,9 +386,33 @@ def test_the_footprint_mandatory_set_excludes_footprint_itself() -> None:
     assert footprint_field_rank("Datasheet", 0) == 3
 
 
-def test_mandatory_name_match_is_case_insensitive() -> None:
-    assert footprint_field_rank("REFERENCE", 0) == 1
-    assert footprint_field_rank("datasheet", 0) == 3
+def test_mandatory_name_match_is_exact() -> None:
+    """``FOOTPRINT::GetField`` compares names exactly (footprint.cpp:730-739).
+
+    A user field named ``description`` stays a user field after the mandatory
+    ``Description``. The case-insensitive match moved it, and 144 lines of a
+    500-part board differed on a byte round trip.
+    """
+    assert footprint_field_rank("REFERENCE", 0) == footprint_field_rank("x", 0)
+    assert footprint_field_rank("description", 2) > footprint_field_rank("Description", 0)
+    assert footprint_field_rank("Datasheet", 0) == 3
+
+
+def test_a_lower_case_description_field_keeps_its_place() -> None:
+    footprint = _footprint(
+        properties=[
+            _property("Reference"),
+            _property("Value"),
+            _property("Datasheet"),
+            _property("Description"),
+            _property("MPN"),
+            _property("description"),
+        ]
+    )
+
+    emitted = re.findall(r'\(property "([^"]+)"', dump_mod(footprint))
+
+    assert emitted == ["Reference", "Value", "Datasheet", "Description", "MPN", "description"]
 
 
 def test_an_appended_datasheet_emits_in_its_mandatory_slot() -> None:

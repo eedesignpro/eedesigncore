@@ -140,13 +140,18 @@ def dump_fill_sch(fill: Fill) -> str:
 # ---------------------------------------------------------------------------
 
 
-def dump_effects(attrs: TextAttributes) -> str:
+def dump_effects(attrs: TextAttributes, *, hide: bool = False) -> str:
     """Emit an ``effects`` block from ``TextAttributes``.
 
     Mirrors ``EDA_TEXT::Format`` (eda_text.cpp:1060-1119): emits font, optional
     justify, optional href only. It NEVER emits ``hide`` inside ``(effects ...)``
-    -- KiCad emits visibility at item level (PCB_FIELD / saveField / savePin),
+    -- KiCad 10 emits visibility at item level (PCB_FIELD / saveField / savePin),
     never in the effects body. See context/audit/verify-dump-effects-hide-2026-07-13.md.
+
+    *hide* is the one exception, for the KiCad 9 schematic field layout:
+    ``SCH_FIELD::Format`` (9.0.9 ``eeschema/sch_field.cpp:517-586``) emits
+    ``(hide yes)`` between ``(justify …)`` and ``(href …)``. Only the legacy
+    field writers pass it.
     """
     h, w = attrs.font_size
     font_parts = []
@@ -179,6 +184,9 @@ def dump_effects(attrs: TextAttributes) -> str:
     if justify_tokens:
         parts.append("(justify " + " ".join(justify_tokens) + ")")
 
+    if hide:
+        parts.append("(hide yes)")
+
     # (href …) hyperlink, emitted after justify (eda_text.cpp:1116-1117)
     if attrs.href is not None:
         parts.append(f"(href {q(attrs.href)})")
@@ -186,7 +194,7 @@ def dump_effects(attrs: TextAttributes) -> str:
     return "(effects " + " ".join(parts) + ")"
 
 
-def dump_field_effects(attrs: TextAttributes | None) -> str:
+def dump_field_effects(attrs: TextAttributes | None, *, hide: bool = False) -> str:
     """Emit the ``effects`` block of a property, defaulting the way KiCad does.
 
     ``EDA_TEXT::Format`` has no early exit (``common/eda_text.cpp:1061-1119``), so
@@ -199,8 +207,10 @@ def dump_field_effects(attrs: TextAttributes | None) -> str:
     fresh field, which is a font of ``DEFAULT_SIZE_TEXT`` mils square
     (``include/eda_text.h:81``, ``common/eda_text.cpp:105-106``). That is 1.27 mm
     on both internal-unit scales (ADR-068).
+
+    *hide* puts ``(hide yes)`` inside the block, the KiCad 9 field layout.
     """
-    return dump_effects(attrs if attrs is not None else TextAttributes())
+    return dump_effects(attrs if attrs is not None else TextAttributes(), hide=hide)
 
 
 # ---------------------------------------------------------------------------

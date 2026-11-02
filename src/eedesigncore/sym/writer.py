@@ -36,6 +36,7 @@ from eedesigncore.common.sch_family.shapes import (
 )
 from eedesigncore.common.sch_family.symbol import Symbol, SymbolUnit, join_fp_filters
 from eedesigncore.common.sch_family.text import SymText, SymTextBox
+from eedesigncore.common.sch_family.versions import is_legacy_symbol_lib
 from eedesigncore.common.writers import (
     dump_bool as _bool,
 )
@@ -74,8 +75,14 @@ from eedesigncore.sym.models import SymbolLib
 # ---------------------------------------------------------------------------
 
 
-def _dump_property(prop: Property) -> str:
-    """Emit a ``property`` token."""
+def _dump_property(prop: Property, *, legacy: bool = False) -> str:
+    """Emit a ``property`` token.
+
+    *legacy* is the KiCad 9 lib-cache layout (9.0.9
+    ``sch_io_kicad_sexpr_lib_cache.cpp:418-437``): bare ``(show_name)`` and
+    ``(do_not_autoplace)`` only when set, and ``(hide yes)`` inside the effects
+    block instead of at property level.
+    """
     private_tok = "private " if prop.private else ""
     # KiCad uses fmt::format("{:g}", angle) for property angles
     angle_str = _fmt_g(prop.angle)
@@ -83,6 +90,14 @@ def _dump_property(prop: Property) -> str:
         f"(property {private_tok}{_q(prop.name)} {_q(prop.value)}"
         f" (at {_fmt(prop.position[0])} {_fmt(prop.position[1])} {angle_str})"
     ]
+    if legacy:
+        if prop.show_name:
+            parts.append("(show_name)")
+        if prop.do_not_autoplace:
+            parts.append("(do_not_autoplace)")
+        parts.append(_dump_field_effects(prop.attributes, hide=not prop.visible))
+        parts.append(")")
+        return " ".join(parts)
     parts.append(f"(show_name {_bool(prop.show_name)})")
     parts.append(f"(do_not_autoplace {_bool(prop.do_not_autoplace)})")
     if not prop.visible:
@@ -265,11 +280,11 @@ def _dump_pin(pin: Pin) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _dump_unit(unit: SymbolUnit) -> str:
+def _dump_unit(unit: SymbolUnit, *, legacy: bool = False) -> str:
     parts = [f"(symbol {_q(unit.name)}"]
     if unit.unit_display_name is not None:
         parts.append(f"(unit_name {_q(unit.unit_display_name)})")
-    for item in sort_draw_items(unit.items):
+    for item in sort_draw_items(unit.items, legacy=legacy):
         if isinstance(item, SchArc):
             parts.append(_dump_arc(item))
         elif isinstance(item, SchCircle):
@@ -431,7 +446,7 @@ def _own_fp_filters(sym: Symbol) -> list[str]:
 
 
 def _dump_dcm_fields(
-    sym: Symbol, by_name: dict[str, Symbol] | None, *, is_root: bool
+    sym: Symbol, by_name: dict[str, Symbol] | None, *, is_root: bool, legacy: bool = False
 ) -> list[str]:
     """Emit the synthesized DCM properties, each behind its own gate.
 
@@ -445,16 +460,26 @@ def _dump_dcm_fields(
     index = _as_index(by_name)
 
     if is_root and sym.units_locked:
-        parts.append(_dump_property(Property(name="ki_locked", value="", visible=True)))
+        parts.append(
+            _dump_property(Property(name="ki_locked", value="", visible=True), legacy=legacy)
+        )
 
     keywords = _effective_keywords(sym, index)
     if keywords:
-        parts.append(_dump_property(Property(name="ki_keywords", value=keywords, visible=False)))
+        parts.append(
+            _dump_property(
+                Property(name="ki_keywords", value=keywords, visible=False), legacy=legacy
+            )
+        )
 
     fp_filters = _effective_fp_filters(sym, index)
     if fp_filters:
         value = join_fp_filters(fp_filters)
-        parts.append(_dump_property(Property(name="ki_fp_filters", value=value, visible=False)))
+        parts.append(
+            _dump_property(
+                Property(name="ki_fp_filters", value=value, visible=False), legacy=legacy
+            )
+        )
 
     return parts
 
@@ -464,7 +489,9 @@ def _dump_dcm_fields(
 # ---------------------------------------------------------------------------
 
 
-def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> str:
+def _dump_symbol(
+    sym: Symbol, *, by_name: dict[str, Symbol] | None = None, legacy: bool = False
+) -> str:
     """Emit one library symbol.
 
     *by_name* is the enclosing ``.kicad_sym`` library keyed by symbol name. It
@@ -472,6 +499,11 @@ def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> st
     filters the way KiCad does at save time. Omit it and no fallback applies,
     which is what the ``.kicad_sch`` ``lib_symbols`` path does, because KiCad
     resolves no parent inside that block (audit 16.1.5).
+
+    *legacy* is the KiCad 9 layout (9.0.9 ``sch_io_kicad_sexpr_lib_cache.cpp``):
+    bare ``(power)`` (:173), no ``(in_pos_files)`` and no
+    ``(duplicate_pin_numbers_are_jumpers)`` (:200-202), the KiCad 9 property
+    spelling, and pins sorted on position before number (:263).
     """
     parts = [f"(symbol {_q(sym.name)}"]
 
@@ -479,8 +511,8 @@ def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> st
         # Derived symbol
         parts.append(f"(extends {_q(sym.extends)})")
         for field in sort_symbol_fields(sym.fields):
-            parts.append(_dump_property(field))
-        parts.extend(_dump_dcm_fields(sym, by_name, is_root=False))
+            parts.append(_dump_property(field, legacy=legacy))
+        parts.extend(_dump_dcm_fields(sym, by_name, is_root=False, legacy=legacy))
         parts.append(f"(embedded_fonts {_bool(sym.embedded_fonts)})")
         if sym.embedded_files:
             parts.append(_dump_embedded_files(sym.embedded_files))
@@ -489,7 +521,7 @@ def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> st
 
     # Root symbol
     if sym.power_type is not None:
-        parts.append(f"(power {sym.power_type.value})")
+        parts.append("(power)" if legacy else f"(power {sym.power_type.value})")
 
     if sym.body_styles is not None:
         if sym.body_styles == ["demorgan"]:
@@ -516,9 +548,10 @@ def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> st
     parts.append(f"(exclude_from_sim {_bool(sym.exclude_from_sim)})")
     parts.append(f"(in_bom {_bool(sym.in_bom)})")
     parts.append(f"(on_board {_bool(sym.on_board)})")
-    parts.append(f"(in_pos_files {_bool(sym.in_pos_files)})")
-    dup_jumpers = _bool(sym.duplicate_pin_numbers_are_jumpers)
-    parts.append(f"(duplicate_pin_numbers_are_jumpers {dup_jumpers})")
+    if not legacy:
+        parts.append(f"(in_pos_files {_bool(sym.in_pos_files)})")
+        dup_jumpers = _bool(sym.duplicate_pin_numbers_are_jumpers)
+        parts.append(f"(duplicate_pin_numbers_are_jumpers {dup_jumpers})")
 
     if sym.jumper_pin_groups:
         grp_parts = ["(jumper_pin_groups"]
@@ -529,12 +562,12 @@ def _dump_symbol(sym: Symbol, *, by_name: dict[str, Symbol] | None = None) -> st
         parts.append(" ".join(grp_parts))
 
     for field in sort_symbol_fields(sym.fields):
-        parts.append(_dump_property(field))
+        parts.append(_dump_property(field, legacy=legacy))
 
-    parts.extend(_dump_dcm_fields(sym, by_name, is_root=True))
+    parts.extend(_dump_dcm_fields(sym, by_name, is_root=True, legacy=legacy))
 
     for unit in sort_units(sym.units):
-        parts.append(_dump_unit(unit))
+        parts.append(_dump_unit(unit, legacy=legacy))
 
     parts.append(f"(embedded_fonts {_bool(sym.embedded_fonts)})")
     if sym.embedded_files:
@@ -557,8 +590,9 @@ def dump_sym(lib: SymbolLib) -> str:
         f' (generator_version "{_esc(lib.generator_version)}")'
     ]
     by_name = _ParentIndex({sym.name: sym for sym in lib.symbols})
+    legacy = is_legacy_symbol_lib(lib.version)
     for sym in sort_library_symbols(lib.symbols):
-        parts.append(_dump_symbol(sym, by_name=by_name))
+        parts.append(_dump_symbol(sym, by_name=by_name, legacy=legacy))
     parts.append(")")
     return " ".join(parts)
 

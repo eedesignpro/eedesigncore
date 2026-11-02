@@ -7,6 +7,7 @@ from uuid import uuid4
 from eedesigncore.pcb.models import Board
 from eedesigncore.project._update_common import (
     field_value,
+    footprint_path,
     issue,
     match_footprints,
     part_groups,
@@ -50,7 +51,9 @@ def _run(
             changes=changes,
             issues=issues,
         )
-    inspection = inspect_schematic_electrical(source, document_id="schematic-update")
+    inspection = inspect_schematic_electrical(
+        source, document_id="schematic-update", drawing=False
+    )
     if options.update_net_names and inspection.coverage.electrical != "complete":
         issue(
             issues,
@@ -59,7 +62,7 @@ def _run(
         )
     groups = part_groups(inspection, issues, source)
     matched = match_footprints(
-        board.footprints, groups, inspection, options.match_by_reference, issues
+        board.footprints, groups, inspection, options.match_by_reference, issues, source
     )
     documents = {
         document: schematic.model_copy(deep=True) for _, document, schematic in sources(source)
@@ -174,7 +177,7 @@ def _run(
                     setattr(symbol, name, flag)
             if options.match_by_reference:
                 target_fp = next(item for item in updated_board.footprints if item.uuid == fp.uuid)
-                target_fp.path = symbol_path(inspection, ids[0])
+                target_fp.path = footprint_path(source, inspection, ids, target_fp.path)[0]
             if (
                 options.update_references
                 and path not in skipped

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from eedesigncore import (
     NoConnect,
     Property,
@@ -238,3 +240,55 @@ def test_appended_class_membership_matches_captured_native_export():
     after = inspect(tree)
     classes = next(net.class_names for net in after.nets.values() if net.name == "GND")
     assert set(classes) == set(oracle["classes"]["GND"]) - {"Default"}
+
+
+@pytest.mark.parametrize("lone_local_first", [True, False])
+def test_a_global_label_names_a_net_it_shares_with_a_local_label(lone_local_first):
+    """A local label mid-wire and a global label at its end make one global net.
+
+    A second local label of the same name elsewhere on the sheet joins it, and
+    the global label of that name on another sheet joins it too. KiCad names the
+    whole net after the global label. In 0.39.0 the merge kept the local
+    label's sheet-qualified name, so the net split from the other sheet's
+    global label while coverage still read complete.
+    """
+    from eedesigncore import Label, LabelKind, Line, LineType
+
+    tree = load_hierarchy(FIXTURE)
+    root = tree.roots[0].schematic
+    child = tree.roots[0].children[0].schematic
+
+    def wire(start, end, uid):
+        return Line(line_type=LineType.wire, start=start, end=end, uuid=uid)
+
+    def label(kind, position, uid):
+        return Label(kind=kind, content="ESP_EN", shape="passive", position=position, uuid=uid)
+
+    # With the lone local label first, its net absorbs the other one. The
+    # result must not depend on that order.
+    lone = (
+        [wire((200, 40), (210, 40), "w-b")],
+        [label(LabelKind.local, (210, 40), "local-elsewhere")],
+    )
+    shared = (
+        [wire((200, 20), (220, 20), "w-a")],
+        [
+            label(LabelKind.local, (210, 20), "local-mid-wire"),
+            label(LabelKind.global_, (220, 20), "global-wire-end"),
+        ],
+    )
+    first, second = (lone, shared) if lone_local_first else (shared, lone)
+    root.lines[:0] = first[0] + second[0]
+    root.labels[:0] = first[1] + second[1]
+    child.lines.append(wire((200, 60), (210, 60), "w-c"))
+    child.labels.append(label(LabelKind.global_, (210, 60), "global-other-sheet"))
+
+    result = inspect(tree)
+    names = {
+        result.nets[net_id].name
+        for item in result.labels.values()
+        if item.source_uuid
+        in ("local-mid-wire", "global-wire-end", "local-elsewhere", "global-other-sheet")
+        for net_id in item.net_ids
+    }
+    assert names == {"ESP_EN"}

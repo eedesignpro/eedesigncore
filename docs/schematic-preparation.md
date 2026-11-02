@@ -24,6 +24,9 @@ A loaded hierarchy retains its project settings. No further files load from an i
 The operation copies loaded inputs. It does not write source files, start KiCad, read external symbol definitions, or use a graphical editor.
 The optional save call writes only the caller-selected result file.
 
+Pass `drawing=False` to skip the page drawings. Each page then keeps an empty SVG and a `drawing_not_requested` coverage issue, and no item carries drawn bounds.
+Nets, buses, items and resolved text do not change.
+
 The caller supplies document_id and keeps it stable across exports of the same design.
 Use a distinct instance for each board occurrence in an assembly.
 The default instance is design.
