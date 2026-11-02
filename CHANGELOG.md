@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.39.1] - 2026-11-02
+
+- Fix the outline box of a footprint turned off a quarter turn. A rectangle now adds all four corners.
+- Fix pad copper turned two times. The pad angle in the file is already the board angle.
+- Apply the same rule to pad holes, custom pad shapes, and footprint arcs.
+- The design inspection region search now finds a turned part at its true outline.
+
 ## [0.39.0] - 2026-10-29
 
 - Add PCB updates from schematics and schematic updates from PCB footprints.

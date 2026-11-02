@@ -194,6 +194,8 @@ class TestFootprintFrame:
                     pad_type=PadType.smd,
                     shape=PadShape.rect,
                     position=(-2.0, 0.0),
+                    # KiCad saves a pad angle in board terms, so it carries the turn.
+                    angle=angle,
                     size=(2.0, 1.0),
                     layers=["F.Cu"],
                 ),

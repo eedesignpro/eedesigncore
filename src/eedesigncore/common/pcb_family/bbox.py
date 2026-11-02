@@ -85,6 +85,14 @@ def _add(extent: Extent, point: Point, transform: IuTransform, pad: int = 0) -> 
     extent.add(transform(point_to_iu(point)), pad)
 
 
+def _add_rect(
+    extent: Extent, start: Point, end: Point, transform: IuTransform, pad: int = 0
+) -> None:
+    """Add all four corners. Two do not bound a rectangle turned off a quarter turn."""
+    for corner in ((start[0], start[1]), (end[0], start[1]), (end[0], end[1]), (start[0], end[1])):
+        _add(extent, corner, transform, pad)
+
+
 def _add_arc(
     extent: Extent,
     start: Point,
@@ -95,11 +103,12 @@ def _add_arc(
 ) -> None:
     """Add a whole arc: its stored points and every axis crossing in the sweep.
 
-    The transform is rigid, so the extremes of the mapped arc are the mapped
-    extremes of the arc.
+    The three points are mapped FIRST. An axis crossing of the stored arc is not
+    an axis crossing of the arc turned by a footprint off a quarter turn.
     """
-    for point in arc_extreme_points_iu(point_to_iu(start), point_to_iu(mid), point_to_iu(end)):
-        extent.add(transform(point), pad)
+    mapped = (transform(point_to_iu(point)) for point in (start, mid, end))
+    for point in arc_extreme_points_iu(*mapped):
+        extent.add(point, pad)
 
 
 def _add_pts(extent: Extent, pts: list[PtsElement], transform: IuTransform, pad: int = 0) -> None:
@@ -149,9 +158,11 @@ def add_item_extent(  # noqa: C901, PLR0912
     if isinstance(item, PcbText):
         _add(extent, item.position, transform)
         _add_render_cache(extent, item, transform)
-    elif isinstance(item, PcbLine | PcbRect):
+    elif isinstance(item, PcbLine):
         _add(extent, item.start, transform, pad)
         _add(extent, item.end, transform, pad)
+    elif isinstance(item, PcbRect):
+        _add_rect(extent, item.start, item.end, transform, pad)
     elif isinstance(item, PcbCircle):
         span_x = item.end[0] - item.center[0]
         span_y = item.end[1] - item.center[1]
@@ -163,15 +174,16 @@ def add_item_extent(  # noqa: C901, PLR0912
         _add_pts(extent, item.pts, transform, pad)
     elif isinstance(item, PcbTextBox):
         border = pad if item.border_enabled else 0
-        if item.start is not None:
+        if item.start is not None and item.end is not None:
+            _add_rect(extent, item.start, item.end, transform, border)
+        elif item.start is not None:
             _add(extent, item.start, transform, border)
-        if item.end is not None:
+        elif item.end is not None:
             _add(extent, item.end, transform, border)
         _add_pts(extent, item.pts, transform, border)
         _add_render_cache(extent, item, transform)
     elif isinstance(item, TableCell):
-        _add(extent, item.start, transform)
-        _add(extent, item.end, transform)
+        _add_rect(extent, item.start, item.end, transform)
     elif isinstance(item, Table):
         for cell in item.cells:
             add_item_extent(extent, cell, transform, include_width=include_width)

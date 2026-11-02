@@ -17,14 +17,25 @@ from collections.abc import Container, Iterable
 from eedesigncore.common.bbox import BoundingBox, Extent
 from eedesigncore.common.kimath import rotate_point_iu
 from eedesigncore.common.layers import on_layers
+from eedesigncore.common.models import PtsArc
 from eedesigncore.common.pcb_family.bbox import (
     IuTransform,
     add_item_extent,
     half_width_iu,
     identity_iu,
 )
-from eedesigncore.common.transform import PointIU, point_to_iu, to_iu
-from eedesigncore.mod.models import Footprint, Pad, PadPrimitive
+from eedesigncore.common.transform import Point, PointIU, point_to_iu, to_iu, to_mm
+from eedesigncore.mod.models import (
+    Footprint,
+    Pad,
+    PadPrimitive,
+    PrimArc,
+    PrimBbox,
+    PrimCircle,
+    PrimLine,
+    PrimRect,
+    PrimVector,
+)
 from eedesigncore.mod.pad_geometry import (
     pad_hole_extent_mm,
     pad_layer_geometry,
@@ -87,88 +98,84 @@ def _add_pad(
     if not on_layers(pad, layers):
         return
 
+    # The pad POSITION is footprint-relative, so only it takes the footprint map.
+    # The pad ANGLE is board-absolute (see ``pad_shape_position``), so every
+    # offset from the anchor turns by ``pad.angle`` alone, in board terms.
+    anchor = transform(point_to_iu(pad.position))
+
+    def anchor_mm(_: tuple[float, float]) -> tuple[float, float]:
+        return (to_mm(anchor[0]), to_mm(anchor[1]))
+
     for layer in pad_unique_layers(pad):
         geometry = pad_layer_geometry(pad, layer)
-        centre = point_to_iu(pad_shape_position(pad, geometry))
+        centre = point_to_iu(pad_shape_position(pad, geometry, anchor_mm))
         half_x, half_y = to_iu(geometry.size[0] / 2.0), to_iu(geometry.size[1] / 2.0)
         corners = ((-half_x, -half_y), (half_x, -half_y), (half_x, half_y), (-half_x, half_y))
         for corner in corners:
             turned = rotate_point_iu(corner, pad.angle)
-            extent.add(transform((centre[0] + turned[0], centre[1] + turned[1])))
+            extent.add((centre[0] + turned[0], centre[1] + turned[1]))
+        for primitive in geometry.primitives:
+            _add_primitive(extent, primitive, centre, pad.angle, include_width=include_width)
 
     hole = pad_hole_extent_mm(pad)
     if hole is not None:
-        anchor = point_to_iu(pad.position)
         for offset in hole:
             corner = point_to_iu(offset)
-            extent.add(transform((anchor[0] + corner[0], anchor[1] + corner[1])))
-
-    for primitive in pad.primitives or ():
-        _add_primitive(extent, primitive, pad, transform, include_width=include_width)
+            extent.add((anchor[0] + corner[0], anchor[1] + corner[1]))
 
 
 def _add_primitive(
     extent: Extent,
     primitive: PadPrimitive,
-    pad: Pad,
-    transform: IuTransform,
+    shape_position: PointIU,
+    angle: float,
     *,
     include_width: bool,
 ) -> None:
-    """Add one custom-pad primitive, measured in the pad frame then mapped.
+    """Add one custom-pad primitive, measured in the pad frame then placed on the board.
 
-    A primitive is stored relative to the pad anchor and turned with the pad, so
-    the pad angle and the pad position both apply before the caller's transform.
+    ``PAD::buildEffectiveShape``, ``pad.cpp:1277-1291``: each primitive turns by
+    the pad orientation and moves to ``ShapePos``, so a shape offset moves the
+    primitives with the copper. *shape_position* is that point, already in the
+    frame being measured, and *angle* is the board-absolute pad angle.
     """
     from eedesigncore.common.bbox import arc_extreme_points_iu
 
-    anchor = point_to_iu(pad.position)
     pad_width = half_width_iu(primitive, include_width)
 
     def in_pad_frame(point: PointIU) -> PointIU:
-        turned = rotate_point_iu(point, pad.angle)
-        return transform((anchor[0] + turned[0], anchor[1] + turned[1]))
+        turned = rotate_point_iu(point, angle)
+        return (shape_position[0] + turned[0], shape_position[1] + turned[1])
 
-    points: list[PointIU] = []
-    start = getattr(primitive, "start", None)
-    end = getattr(primitive, "end", None)
-    center = getattr(primitive, "center", None)
-    mid = getattr(primitive, "mid", None)
-    pts = getattr(primitive, "pts", None)
+    def add_arc(start: Point, mid: Point, end: Point) -> None:
+        # Turn the three points first: an axis crossing of the stored arc is not
+        # an axis crossing of the turned arc.
+        mapped = (in_pad_frame(point_to_iu(p)) for p in (start, mid, end))
+        for point in arc_extreme_points_iu(*mapped):
+            extent.add(point, pad_width)
 
-    if start is not None and mid is not None and end is not None:
-        points.extend(
-            arc_extreme_points_iu(point_to_iu(start), point_to_iu(mid), point_to_iu(end))
-        )
-    elif center is not None and end is not None:
-        span_x, span_y = end[0] - center[0], end[1] - center[1]
+    if isinstance(primitive, PrimVector | PrimBbox):
+        return  # a proxy item adds no copper (``IsProxyItem``, pad.cpp:1283)
+    if isinstance(primitive, PrimArc):
+        add_arc(primitive.start, primitive.mid, primitive.end)
+    elif isinstance(primitive, PrimCircle):
+        span_x = primitive.end[0] - primitive.center[0]
+        span_y = primitive.end[1] - primitive.center[1]
         radius = to_iu((span_x * span_x + span_y * span_y) ** 0.5)
-        origin = point_to_iu(center)
-        points.extend(
-            [
-                (origin[0] - radius, origin[1] - radius),
-                (origin[0] + radius, origin[1] + radius),
-            ]
-        )
+        extent.add(in_pad_frame(point_to_iu(primitive.center)), radius + pad_width)
+    elif isinstance(primitive, PrimRect):
+        (x1, y1), (x2, y2) = primitive.start, primitive.end
+        for corner in ((x1, y1), (x2, y1), (x2, y2), (x1, y2)):
+            extent.add(in_pad_frame(point_to_iu(corner)), pad_width)
+    elif isinstance(primitive, PrimLine):
+        for point in (primitive.start, primitive.end):
+            extent.add(in_pad_frame(point_to_iu(point)), pad_width)
     else:
-        if start is not None:
-            points.append(point_to_iu(start))
-        if end is not None:
-            points.append(point_to_iu(end))
-        for element in pts or ():
-            if isinstance(element, tuple):
-                points.append(point_to_iu(element))
+        for element in primitive.pts:
+            if isinstance(element, PtsArc):
+                add_arc(element.start, element.mid, element.end)
             else:
-                points.extend(
-                    arc_extreme_points_iu(
-                        point_to_iu(element.start),
-                        point_to_iu(element.mid),
-                        point_to_iu(element.end),
-                    )
-                )
-
-    for point in points:
-        extent.add(in_pad_frame(point), pad_width)
+                extent.add(in_pad_frame(point_to_iu(element)), pad_width)
 
 
 def _add_track(
