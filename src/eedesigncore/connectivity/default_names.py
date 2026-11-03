@@ -35,10 +35,6 @@ approximated:
 - No symbol UUID on ``PinRef``, so Branch A (``sch_pin.cpp:1504-1515``, the
   unannotated-symbol case) cannot build its ``<uuid>-Pad<n>`` form. Raises
   ``UnannotatedSymbolNameNotSupported`` instead of guessing.
-- No stacked-pin de-stacking data on ``PinRef``
-  (``SCH_PIN::GetEffectivePadNumber`` / ``GetSmallestLogicalNumber``,
-  ``sch_pin.cpp:622-640``). ``effective_pad_number`` falls back to the raw pin
-  number, which is exact for every pin that is not part of a stacked group.
 - No pin-visibility data on ``PinRef``. The power short circuit's legacy
   ``else`` branch (``sch_pin.cpp:1449-1454``, an invisible power-input pin on a
   NON-power symbol) can never be reached here, because ``PinRef.is_power`` is
@@ -54,6 +50,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.connectivity.geometry import PinRef
 from eedesigncore.connectivity.netname import escape_netname
 from eedesigncore.connectivity.subgraph import Driver, ItemKind, Subgraph
@@ -143,9 +140,9 @@ def get_default_net_name(
         for name, number, is_nc in siblings
     )
 
-    # `sch_pin.cpp:1492-1494`. No stacked-pin de-stacking data is available;
-    # see the module docstring.
-    effective_pad_number = pin.pin_number
+    # `sch_pin.cpp:1492-1494`: a stacked pin ("[2,4]") names its net by the first
+    # pad in its list (`SCH_PIN::GetEffectivePadNumber`).
+    effective_pad_number = pad_numbers(pin.pin_number)[0]
 
     # `sch_pin.cpp:1504-1515`, Branch A: the reference is unannotated, meaning it
     # ends in a question mark, so the name uses the SYMBOL identifier instead.

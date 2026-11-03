@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.41.0] - 2026-11-03
+
+- Accept stacked pin numbers in design updates, as KiCad 10 does. A library pin numbered `[2,4]` or `[1-3,7]` now puts its net on each listed pad. Before, both update directions refused any schematic with such a pin.
+- Write each pad's pin function for a stacked pin as KiCad's netlist does: the pin name and the pad number, or the pad number alone for an unnamed pin.
+- List each pad of a stacked pin in the footprint unit pins.
+- Name a default net from the first pad of a stacked pin.
+- The reverse update reads every listed pad. Listed pads on two board nets block as a split.
+- The netbom joins a stacked pin to each listed pad. Invalid notation joins one pad of the same text, as in KiCad, and produces an issue.
+- Add `expand_pin_number` in `eedesigncore.common.pin_numbers`.
+
 ## [0.40.1] - 2026-11-02
 
 - Fix the outline box of a footprint turned off a quarter turn. A rectangle now adds all four corners.

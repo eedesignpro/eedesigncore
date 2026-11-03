@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import Field
 
 from eedesigncore.common.base import KicadModel
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.pcb.models import Board
 from eedesigncore.schematic_view.inspection import SchematicElectricalSnapshot
 
@@ -181,13 +182,14 @@ def plan_schematic_board_update(
         wanted: dict[str, set[str | None]] = defaultdict(set)
         for pin in inspection.items.values():
             if pin.kind == "pin" and pin.parent_item == part.id and pin.netlist_member:
-                if pin.pin_number is not None and (
+                # A stacked number ("[2,4]") puts the pin on each pad it names.
+                pads = pad_numbers(pin.pin_number) if pin.pin_number is not None else []
+                if pads and (
                     pin.id in inspection.no_connect_pins or pin.electrical_type == "no_connect"
                 ):
-                    no_connect_numbers.add(pin.pin_number)
+                    no_connect_numbers.update(pads)
                     continue
-                if pin.pin_number is not None:
-                    connected_numbers.add(pin.pin_number)
+                connected_numbers.update(pads)
                 if pin.pin_number is None or not pin.net_ids:
                     blockers.append(f"Selected pin lacks a resolved scalar net: {pin.id}")
                     continue
@@ -195,7 +197,8 @@ def plan_schematic_board_update(
                     if key not in inspection.nets:
                         blockers.append(f"Selected pin references an absent net: {pin.id}")
                     else:
-                        wanted[pin.pin_number].add(inspection.nets[key].name)
+                        for number in pads:
+                            wanted[number].add(inspection.nets[key].name)
         if no_connect_numbers & connected_numbers:
             blockers.append("A pad number has conflicting connected and no-connect pin evidence.")
         if not wanted and not no_connect_numbers:

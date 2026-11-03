@@ -8,7 +8,6 @@ from hashlib import sha256
 from pydantic import BaseModel
 
 from eedesigncore.common.models import Property, TextAttributes
-from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.connectivity.geometry import instance_reference
 from eedesigncore.mod.models import Footprint
 from eedesigncore.pcb.models import Board
@@ -52,18 +51,6 @@ def validate_inputs(
                 issues,
                 "instance_unit_geometry",
                 "The saved occurrence unit differs from the placed symbol unit.",
-                document,
-            )
-        if any(
-            isinstance(item, Pin) and item.number.startswith("[") and item.number.endswith("]")
-            for definition in sheet.lib_symbols
-            for unit in definition.units
-            for item in unit.items
-        ):
-            issue(
-                issues,
-                "stacked_pin_numbers",
-                "Design updates require expanded stacked pin numbers.",
                 document,
             )
         if sheet.rule_areas:

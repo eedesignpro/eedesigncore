@@ -15,6 +15,7 @@ from eedesigncore.common.kimath import rotate_point_iu
 from eedesigncore.common.models import Property
 from eedesigncore.common.paths import is_remote_uri
 from eedesigncore.common.pcb_family.board_items import Zone
+from eedesigncore.common.pin_numbers import expand_pin_number, is_stacked
 from eedesigncore.common.sch_family.ordering import resolve_parent_symbol
 from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.common.source_reads import _active, _capture_reads, _record_absent
@@ -776,15 +777,22 @@ class _Builder:
                 ),
             )
             self.link(occurrence, "pins", record.id, "symbol")
-            endpoint = self.endpoint(component, pin.number, record.id)
-            self.link(endpoint, "symbol_pins", record.id, "pin")
-            if pin.number.startswith("[") and pin.number.endswith("]"):
-                record.data["number_status"] = "stacked_notation_unresolved"
+            # A stacked number ("[2,4]") puts the pin on each pad it names, as the
+            # KiCad netlist does. Invalid notation names itself, also as in KiCad.
+            numbers, valid = expand_pin_number(pin.number)
+            endpoints = [self.endpoint(component, number, record.id) for number in numbers]
+            for endpoint in endpoints:
+                self.link(endpoint, "symbol_pins", record.id, "pin")
+            if not valid:
+                record.data["number_status"] = "stacked_notation_invalid"
                 self.issue(
-                    "stacked_pin_number_unresolved",
-                    "Stacked pin numbers require expansion before pad matching.",
+                    "stacked_pin_number_invalid",
+                    "Invalid stacked pin-number notation matches one pad of the same text.",
                     [record.id],
                 )
+            elif is_stacked(pin.number):
+                record.data["number_status"] = "stacked"
+                record.data["pad_numbers"] = _json(numbers)
             else:
                 record.data["number_status"] = "literal"
             if placed.angle % 90 == 0 and placed.mirror in (None, "x", "y"):
@@ -796,13 +804,15 @@ class _Builder:
                 record.data["no_connect_status"] = "explicit_marker" if markers else "not_declared"
                 for marker in markers:
                     self.link(record.id, "no_connects", marker, "symbol_pins")
-                    self.link(endpoint, "no_connects", marker, "pins")
-                if markers and self.document.records[endpoint].links.get("nets"):
-                    self.issue(
-                        "no_connect_assignment_conflict",
-                        "A declared no-connect pin has a board net assignment.",
-                        [record.id, endpoint],
-                    )
+                    for endpoint in endpoints:
+                        self.link(endpoint, "no_connects", marker, "pins")
+                for endpoint in endpoints:
+                    if markers and self.document.records[endpoint].links.get("nets"):
+                        self.issue(
+                            "no_connect_assignment_conflict",
+                            "A declared no-connect pin has a board net assignment.",
+                            [record.id, endpoint],
+                        )
             else:
                 record.data["no_connect_status"] = "unresolved_position"
                 self.issue(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.mod.models import Footprint
 from eedesigncore.pcb._update_metadata import unit_information
 from eedesigncore.project._update_common import issue, placed_symbols, sources, symbol_path
@@ -51,7 +52,8 @@ def swap_units(
                         (inspection.nets[key].name or "").rsplit("/", 1)[-1] for key in pin.net_ids
                     }
                     if len(resolved) == 1:
-                        names[pin.pin_number] = next(iter(resolved))
+                        for number in pad_numbers(pin.pin_number):
+                            names[number] = next(iter(resolved))
             vectors.append([names.get(number, "") for number in pin_numbers])
             wanted.append(
                 [

@@ -187,12 +187,22 @@ Shared-symbol pin swaps fall back to label checks with a warning.
 Derived definitions, ambiguous pins, and unequal lengths block geometry swapping.
 Power naming pins do not participate in pin swaps.
 
+## Stacked pin numbers
+
+A library pin number in square brackets lists the pads of one pin, as in KiCad 10.
+`[2,4]` names pads 2 and 4, and `[1-3,7]` and `[A1-A3]` use ranges.
+The forward update puts the pin's net on every listed pad.
+Each pad's pin function is the pin name, an underscore and the pad number. An unnamed pin with more than one pad takes the pad number.
+Footprint unit pin lists name each listed pad.
+A default net name uses the first listed pad, as `SCH_PIN::GetEffectivePadNumber` does.
+The reverse update reads every listed pad. Listed pads on different board nets need a pin change and block, like any other split.
+Invalid notation, such as `[3-1]`, names one pad with the same text, as in KiCad.
+
 ## Shared limits
 
 - Saved occurrence units that differ from the placed unit require occurrence-specific geometry and currently block both directions.
 - Assembly variants require explicit variant selection and currently block both directions.
 - Rule-area population and component-class inheritance currently block both directions.
-- Stacked library pin notation enclosed in square brackets requires expansion and currently blocks both directions.
 - Incomplete electrical coverage blocks requested net changes.
 - Direct power naming changes require a separate explicit power-symbol update.
 - Arbitrary pin permutations, native wire cleanup, and copper-island reconstruction are not implemented.

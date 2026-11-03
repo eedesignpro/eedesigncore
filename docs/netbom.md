@@ -134,8 +134,9 @@ Ambiguous associations retain candidate links and separate unmatched schematic r
 Within an associated component, literal pin numbers connect symbol pins to physical pads.
 Alternate selections preserve the base name, selected name, effective name, electrical type, and shape.
 An invalid selection remains unresolved and produces an issue.
-Stacked pin-number notation remains explicit and produces an unsupported-expansion issue in this version.
-The exporter does not guess an expansion or invent a pad association.
+A stacked pin number such as `[2,4]` joins the symbol pin to every pad it lists, as the KiCad netlist does.
+The symbol pin record keeps the bracket text, sets `number_status` to `stacked`, and lists `pad_numbers`.
+Invalid notation, such as `[3-1]`, joins one pad with the same text, sets `stacked_notation_invalid`, and produces an issue.
 
 A no-connect marker matches a pin at its calculated sheet position.
 The exporter retains the marker separately from the board assignment.

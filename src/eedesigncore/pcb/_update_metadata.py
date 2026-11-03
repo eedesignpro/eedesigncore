@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from eedesigncore.common.pcb_family import ComponentClasses, FootprintGateUnit, FootprintUnitInfo
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.common.sch_family.ordering import resolve_symbol_definition
 from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.common.sch_family.symbol import join_fp_filters
@@ -57,7 +58,7 @@ def unit_information(schematic: Schematic, placed: PlacedSymbol) -> FootprintUni
             while index:
                 index, remainder = divmod(index - 1, 26)
                 name = chr(65 + remainder) + name
-        units.append(
-            FootprintGateUnit(name=name, pins=list(dict.fromkeys(pin.number for pin in pins)))
-        )
+        # LIB_SYMBOL::GetUnitPinInfo lists each pad of a stacked pin.
+        numbers = (number for pin in pins for number in pad_numbers(pin.number))
+        units.append(FootprintGateUnit(name=name, pins=list(dict.fromkeys(numbers))))
     return FootprintUnitInfo(units=units)

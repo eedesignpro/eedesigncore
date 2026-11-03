@@ -482,3 +482,28 @@ def test_unmatched_board_pin_is_reported_as_incomplete_schematic_association() -
     assert pin.data["symbol_association"] == "unresolved"
     assert pin.links.get("issues")
     assert result.coverage["schematic"].status == "partial"
+
+
+def test_stacked_pin_number_joins_every_listed_pad() -> None:
+    pcb, sch = board(), schematic()
+    pcb.footprints[0].pads.append(Pad(id=uid(21), number="3", layers=["F.Cu"], net_name="IN"))
+    sch.lib_symbols[0].units[0].items[0].number = "[1,3]"
+    result = build_netbom(pcb, schematic=sch)
+    symbol_pin = next(r for r in records(result, "symbol_pin") if r.data["number"] == "[1,3]")
+    assert symbol_pin.data["number_status"] == "stacked"
+    assert symbol_pin.data["pad_numbers"] == ["1", "3"]
+    pins = {r.data["number"]: r for r in records(result, "pin")}
+    assert set(pins) == {"1", "2", "3"}
+    for number in ("1", "3"):
+        assert pins[number].data["symbol_association"] == "matched"
+        assert pins[number].links["symbol_pins"] == [symbol_pin.id]
+    assert not any("stacked" in r.data["code"] for r in records(result, "issue"))
+
+
+def test_invalid_stacked_notation_matches_its_own_text() -> None:
+    sch = schematic()
+    sch.lib_symbols[0].units[0].items[0].number = "[3-1]"
+    result = build_netbom(board(), schematic=sch)
+    symbol_pin = next(r for r in records(result, "symbol_pin") if r.data["number"] == "[3-1]")
+    assert symbol_pin.data["number_status"] == "stacked_notation_invalid"
+    assert any(r.data["code"] == "stacked_pin_number_invalid" for r in records(result, "issue"))

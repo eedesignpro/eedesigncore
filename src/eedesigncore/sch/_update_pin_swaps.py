@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.connectivity.geometry import collect
 from eedesigncore.mod.models import Footprint
@@ -70,7 +71,7 @@ def swap_pins(
                 wanted = {
                     (pad.net_name or "").rsplit("/", 1)[-1]
                     for pad in footprint.pads
-                    if pad.number == pin.pin_number
+                    if pad.number in pad_numbers(pin.pin_number)
                 }
                 if (
                     len(current) == len(wanted) == 1

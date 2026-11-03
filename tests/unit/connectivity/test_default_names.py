@@ -273,3 +273,15 @@ class TestApplyUnconnectedPrefixFixup:
         sub = Subgraph(drivers=[driver])
         name = apply_unconnected_prefix_fixup(sub, pin, sibling_pins=[sibling])
         assert name == "unconnected-(U9A-CLK-Pad3)"
+
+
+class TestStackedPins:
+    """`sch_pin.cpp:1492-1494`: a stacked pin names its net by its first pad."""
+
+    def test_an_unnamed_stacked_pin_uses_its_first_pad(self) -> None:
+        pin = _pin(ref="J1", num="[2,4]", name="")
+        assert get_default_net_name(pin, force_no_connect=False) == "Net-(J1-Pad2)"
+
+    def test_an_unconnected_named_stacked_pin_uses_its_first_pad(self) -> None:
+        pin = _pin(ref="U1", num="[5-7]", name="GND")
+        assert get_default_net_name(pin, force_no_connect=True) == "unconnected-(U1-GND-Pad5)"

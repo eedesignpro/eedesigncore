@@ -6,6 +6,7 @@ from collections import defaultdict
 from uuid import UUID, uuid5
 
 from eedesigncore.common.models import JustifyH, JustifyV, TextAttributes
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.common.sch_family.ordering import resolve_symbol_definition
 from eedesigncore.connectivity.build import build_subgraphs
 from eedesigncore.connectivity.geometry import (
@@ -122,7 +123,7 @@ def update_net_names(
                 desired.update(
                     pad.net_name.rsplit("/", 1)[-1]
                     for pad in fp.pads
-                    if pad.number == pin.pin_number and pad.net_name
+                    if pad.number in pad_numbers(pin.pin_number) and pad.net_name
                 )
                 for item in inspection.items.values():
                     parent = inspection.items.get(item.parent_item or "")

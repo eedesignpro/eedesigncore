@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from uuid import uuid4
 
 from eedesigncore.common.pcb_family import ComponentClasses, FootprintUnitInfo
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.common.uuid_ops import _iter_models
 from eedesigncore.mod.models import Footprint, FootprintPlacement
 from eedesigncore.pcb._update_footprints import replace_or_add, stable_ids
@@ -44,14 +45,15 @@ from eedesigncore.schematic_view.inspection import (
 from eedesigncore.schematic_view.models import ViewItem
 
 
-def _pin_function(name: str | None, number: str) -> str:
-    """The pad ``pinfunction`` KiCad's netlist carries for one pin.
+def _pin_function(name: str | None, number: str, stacked: bool = False) -> str:
+    """The pad ``pinfunction`` KiCad's netlist carries for one pad of a pin.
 
     ``netlist_exporter_xml.cpp:1322-1325``: the shown pin name, an underscore and
-    the pin number, or nothing when the pin has no name. ``~`` shows as no name.
+    the pad number. A pin with no name gives nothing, except a stacked pin on
+    more than one pad, which gives the pad number. ``~`` shows as no name.
     """
     shown = "" if name in (None, "", "~") else name
-    return f"{shown}_{number}" if shown else ""
+    return f"{shown}_{number}" if shown else number if stacked else ""
 
 
 def _pin_type(
@@ -294,13 +296,16 @@ def _run(
                 if len(names) != 1 or not next(iter(names), None):
                     issue(issues, "pin_net", "The pin does not resolve to one scalar net.", pin.id)
                     continue
-                pins[pin.pin_number].append(
-                    (
-                        next(iter(names)) or "",
-                        _pin_function(pin.pin_name, pin.pin_number),
-                        _pin_type(pin, inspection, net_pins),
+                # A stacked number ("[2,4]") puts the pin on each pad it names.
+                numbers = pad_numbers(pin.pin_number)
+                for number in numbers:
+                    pins[number].append(
+                        (
+                            next(iter(names)) or "",
+                            _pin_function(pin.pin_name, number, len(numbers) > 1),
+                            _pin_type(pin, inspection, net_pins),
+                        )
                     )
-                )
             for number in pins.keys() - {pad.number for pad in fp.pads}:
                 issue(
                     issues,

@@ -980,23 +980,78 @@ def test_unchanged_resolved_net_preserves_overridden_local_label_text():
     assert not any(change.kind == "rename_net_label" for change in result.changes)
 
 
-@pytest.mark.parametrize(
-    "number, blocked", [("[1]", True), ("[1,2]", True), ("[A1-A3]", True), ("1,2", False)]
-)
-@pytest.mark.parametrize("direction", ["forward", "reverse"])
-def test_stacked_pin_syntax_requires_expansion_but_literal_comma_does_not(
-    number, blocked, direction
-):
+def stacked_design(number="[1,3]"):
+    """The test design with pin A stacked on pads 1 and 3."""
     board, sch = design()
     sch.lib_symbols[0].units[0].items[0].number = number
-    board.footprints[0].pads[0].number = number
+    board.footprints[0].pads.append(
+        Pad(number="3", id=uid("pad3"), position=(5.08, 0), size=(1, 1), layers=["F.Cu"])
+    )
+    return board, sch
+
+
+@pytest.mark.parametrize("direction", ["forward", "reverse"])
+@pytest.mark.parametrize("number", ["[1]", "[1,3]", "[1-3]", "1,2"])
+def test_stacked_pin_numbers_do_not_block_either_direction(number, direction):
+    board, sch = stacked_design(number)
     planner = (
         plan_update_pcb_from_schematic
         if direction == "forward"
         else plan_update_schematic_from_pcb
     )
     plan = planner(board, sch)
-    assert ("stacked_pin_numbers" in {issue.code for issue in plan.blockers}) == blocked
+    assert "stacked_pin_numbers" not in {issue.code for issue in plan.blockers}
+
+
+def test_forward_stacked_pin_puts_its_net_on_every_listed_pad():
+    board, sch = stacked_design()
+    result = update_pcb_from_schematic(board, sch)
+    pads = {pad.number: pad for pad in result.board.footprints[0].pads}
+    assert (pads["1"].net_name, pads["2"].net_name, pads["3"].net_name) == (
+        "NET_A",
+        "NET_B",
+        "NET_A",
+    )
+    # netlist_exporter_xml.cpp: the pin name, an underscore and each pad number.
+    assert (pads["1"].pinfunction, pads["3"].pinfunction) == ("A_1", "A_3")
+    assert result.board.footprints[0].unit_info.units[0].pins == ["1", "3", "2"]
+
+
+def test_forward_unnamed_stacked_pin_takes_the_pad_number_as_function():
+    board, sch = stacked_design()
+    sch.lib_symbols[0].units[0].items[0].name = "~"
+    result = update_pcb_from_schematic(board, sch)
+    pads = {pad.number: pad for pad in result.board.footprints[0].pads}
+    assert (pads["1"].pinfunction, pads["3"].pinfunction) == ("1", "3")
+
+
+def test_forward_stacked_pin_with_a_missing_pad_blocks():
+    board, sch = stacked_design("[1,4]")
+    plan = plan_update_pcb_from_schematic(board, sch)
+    assert "missing_pad" in {issue.code for issue in plan.blockers}
+
+
+def test_forward_literal_comma_is_one_pad_number():
+    board, sch = stacked_design("1,2")
+    plan = plan_update_pcb_from_schematic(board, sch)
+    assert "missing_pad" in {issue.code for issue in plan.blockers}
+
+
+def test_reverse_stacked_pin_reads_every_listed_pad():
+    board, sch = stacked_design()
+    for pad in board.footprints[0].pads:
+        if pad.number in ("1", "3"):
+            pad.net_name = "NET_C"
+    result = update_schematic_from_pcb(board, sch)
+    assert "NET_C" in {label.content for label in result.schematic.labels}
+
+
+def test_reverse_stacked_pads_on_two_nets_need_a_pin_change():
+    board, sch = stacked_design()
+    board.footprints[0].pads[0].net_name = "NET_C"
+    board.footprints[0].pads[2].net_name = "NET_D"
+    plan = plan_update_schematic_from_pcb(board, sch)
+    assert "pin_swap_required" in {issue.code for issue in plan.blockers}
 
 
 def test_common_only_definition_still_reports_one_footprint_unit():
