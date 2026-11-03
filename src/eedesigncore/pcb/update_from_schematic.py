@@ -89,6 +89,69 @@ def _same_units(first: FootprintUnitInfo, second: FootprintUnitInfo) -> bool:
     )
 
 
+def _same_footprint(board_id: str, wanted: str) -> bool:
+    """KiCad's ``fpidMatches``: a name with no library compares the item name only.
+
+    ``board_netlist_updater.cpp:2105-2112``.
+    """
+    if ":" not in wanted:
+        return board_id.split(":", 1)[-1] == wanted
+    return board_id == wanted
+
+
+def _emptied_groups(board: Board, member: str) -> set[str]:
+    """Return the identifiers of the groups :func:`_leave_groups` would remove."""
+    members = {
+        group.id or str(index): set(group.members) for index, group in enumerate(board.groups)
+    }
+    removed: set[str] = set()
+    pending = [member]
+    while pending:
+        current = pending.pop()
+        for key, items in members.items():
+            if current in items and key not in removed:
+                items.discard(current)
+                if not items:
+                    removed.add(key)
+                    pending.append(key)
+    return removed
+
+
+def _leave_groups(board: Board, member: str, changes: list[DesignUpdateChange]) -> None:
+    """Take *member* out of every board group, as ``BOARD_COMMIT`` does on removal.
+
+    KiCad does not write a group with no members (``pcb_io_kicad_sexpr.cpp:2482``),
+    so a group left empty is removed too, and leaves its own parent group.
+    """
+    pending = [member]
+    while pending:
+        current = pending.pop()
+        for group in list(board.groups):
+            if current not in group.members:
+                continue
+            group.members = [item for item in group.members if item != current]
+            changes.append(
+                DesignUpdateChange(
+                    kind="ungroup_footprint" if current == member else "ungroup_group",
+                    reference="",
+                    identity=current,
+                    before=group.id or group.name,
+                )
+            )
+            if not group.members:
+                board.groups.remove(group)
+                changes.append(
+                    DesignUpdateChange(
+                        kind="remove_group",
+                        reference="",
+                        identity=group.id or "",
+                        before=group.name,
+                    )
+                )
+                if group.id:
+                    pending.append(group.id)
+
+
 def _run(
     board: Board,
     source: Schematic | SheetHierarchy,
@@ -126,14 +189,22 @@ def _run(
             for key in view_item.net_ids:
                 net_pins[key].append(view_item)
     expected: dict[tuple[str, int], str] = {}
+    skip = options.skip_blocked_parts
     for reference, ids in groups.items():
         part = inspection.parts[ids[0]]
         path = symbol_path(inspection, ids[0])
         old = matching.get(reference)
         desired = part.fields.get("Footprint", "")
         if not desired:
-            issue(issues, "missing_footprint", "The symbol has no assigned footprint.", reference)
-            continue
+            issue(
+                issues,
+                "missing_footprint",
+                "The symbol has no assigned footprint.",
+                reference,
+                warning=skip,
+            )
+            if not (skip and old is not None):
+                continue
         if old is not None and old.variants:
             issue(
                 issues,
@@ -141,44 +212,59 @@ def _run(
                 "Variant footprint replacement needs an explicit variant selection.",
                 reference,
             )
-        replace = old is not None and (
-            options.refresh_footprints or (options.replace_footprints and old.fp_id != desired)
+        if desired and ":" not in desired:
+            # KiCad warns on every run (board_netlist_updater.cpp:2013-2021).
+            issue(
+                issues,
+                "footprint_without_library",
+                "The footprint has no library name. Use the Library:Footprint form.",
+                reference,
+                warning=True,
+            )
+        replace = (
+            bool(desired)
+            and old is not None
+            and (
+                options.refresh_footprints
+                or (options.replace_footprints and not _same_footprint(old.fp_id, desired))
+            )
         )
+        failure: tuple[str, str, str] | None = None
         if old is None or replace:
             definition = libraries.get(desired)
             placement = old.at if old else placements.get(reference)
             if definition is None:
-                issue(
-                    issues,
+                failure = (
                     "missing_definition",
                     "Supply the selected footprint definition.",
                     desired,
                 )
-                continue
-            if definition.fp_id not in (desired, desired.split(":", 1)[-1]):
-                issue(
-                    issues,
+            elif definition.fp_id not in (desired, desired.split(":", 1)[-1]):
+                failure = (
                     "definition_identity",
                     "The supplied footprint definition has a different identifier.",
                     desired,
                 )
-                continue
-            if placement is None:
-                issue(
-                    issues,
+            elif placement is None:
+                failure = (
                     "missing_placement",
                     "Supply a placement for the new footprint.",
                     reference,
                 )
-                continue
-            if old is not None and old.locked and not options.override_locks:
-                issue(
-                    issues,
+            elif old is not None and old.locked and not options.override_locks:
+                failure = (
                     "locked_replacement",
                     "Footprint replacement requires explicit permission to override its lock.",
                     reference,
                 )
-                continue
+            if failure is not None:
+                # With skip_blocked_parts, KiCad's choice: report the part, keep
+                # the old footprint, and still update its fields and nets.
+                issue(issues, *failure, warning=skip)
+                if not (skip and old is not None):
+                    continue
+        if (old is None or replace) and failure is None:
+            assert definition is not None and placement is not None
             definition = definition.model_copy(deep=True)
             definition.fp_id = desired
             fp = replace_or_add(result, definition, old, placement, seed, reference, issues)
@@ -307,11 +393,14 @@ def _run(
                         )
                     )
             for number in pins.keys() - {pad.number for pad in fp.pads}:
+                # KiCad reports this as an error and still applies the update
+                # (board_netlist_updater.cpp:1939-1947, 2440-2462).
                 issue(
                     issues,
                     "missing_pad",
                     "A schematic pin has no footprint pad.",
                     reference + "." + number,
+                    warning=skip,
                 )
             no_connect_names: set[str] = set()
             schematic_names = {net.name for net in inspection.nets.values()}
@@ -417,7 +506,21 @@ def _run(
                 for name in ("uuid", "id")
                 if name in type(model).model_fields and getattr(model, name)
             }
-            if removed_ids.intersection(referenced):
+            # KiCad removes a deleted footprint from its group. A generator, or a
+            # group that names a child of the footprint, still blocks.
+            owners = [group for group in result.groups if fp.uuid and fp.uuid in group.members]
+            others = removed_ids - {fp.uuid} if options.delete_grouped_footprints else removed_ids
+            blocking = bool(others.intersection(referenced)) or any(
+                fp.uuid in generator.members for generator in result.generators
+            )
+            if owners and options.delete_grouped_footprints and fp.uuid:
+                # An emptied group that a generator names would leave a dangling
+                # member, so it blocks, as group transfer already does.
+                emptied = _emptied_groups(result, fp.uuid)
+                blocking = blocking or any(
+                    emptied.intersection(generator.members) for generator in result.generators
+                )
+            if blocking or (owners and not options.delete_grouped_footprints):
                 issue(
                     issues,
                     "group_deletion",
@@ -425,6 +528,16 @@ def _run(
                     fp.uuid or "",
                 )
                 continue
+            if owners:
+                assert fp.uuid is not None
+                _leave_groups(result, fp.uuid, changes)
+                issue(
+                    issues,
+                    "grouped_deletion",
+                    "The deleted footprint was removed from its board group.",
+                    fp.uuid,
+                    warning=True,
+                )
             if any(pad.net_name in copper.net_names for pad in fp.pads):
                 issue(
                     issues,

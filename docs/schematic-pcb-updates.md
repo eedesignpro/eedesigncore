@@ -40,7 +40,25 @@ updated_schematic_documents = reverse.documents
 
 Supply every definition needed for a new or replaced footprint.
 A definition can have the qualified identifier or its item-name portion.
-The helper does not resolve library files from a nickname or access the network.
+The update itself does not read library files or access the network.
+`load_update_footprints` loads the definitions through a footprint library table, as KiCad does:
+
+```python
+from eedesigncore import load_update_footprints, resolve_lib_table
+
+table = resolve_lib_table("fp", project_dir="path/to/project")
+loaded = load_update_footprints(source, table)
+if loaded.missing:
+    print(loaded.missing)  # library identifier -> reason
+forward = update_pcb_from_schematic(board, source, library_footprints=loaded.footprints)
+```
+
+It reads every Footprint field in the schematic. An identifier that it cannot load goes to `missing` with the reason. It does not raise.
+A name with no library name, such as `R_0603`, is searched for in every enabled library in alphabetical order, as KiCad does.
+The library found goes to `notes`. The update then gives a `footprint_without_library` warning, as KiCad does on every run.
+A board footprint matches such a name by its item name alone, so the update does not replace it again on each run.
+The loader reads a footprint file only when the stored file name has the same letter case, and only inside the allowed folders of the table.
+It refuses a name with a character Windows does not allow in a file name, and a file larger than 64 MiB.
 New footprints require explicit placements keyed by reference. Coordinates use millimeters.
 Existing footprints keep their position, orientation, side, lock, and parent UUID.
 
@@ -105,6 +123,46 @@ All controls belong to `PcbUpdateOptions`.
 | `update_references` | `True` | Copy the schematic reference. |
 | `update_values` | `True` | Copy the schematic value. |
 | `preserve_routed_contacts` | `True` | Block changed or deleted pads on nets that contain copper. |
+| `delete_grouped_footprints` | `False` | Delete an unmatched footprint that is a board group member, and remove it from the group. |
+| `skip_blocked_parts` | `False` | Report a part that cannot be replaced or added, keep its old footprint, and apply the rest. |
+
+### The KiCad dialog check boxes
+
+Each check box of the KiCad 10 Update PCB from Schematic dialog has one option, with the same default.
+
+| Dialog check box | Option |
+|---|---|
+| Re-link footprints to schematic symbols based on their reference designators | `match_by_reference` |
+| Group footprints based on symbol group | `transfer_symbol_groups` |
+| Replace footprints with those specified by symbols | `replace_footprints` |
+| Delete footprints with no symbols | `delete_extra_footprints` |
+| Override locks | `override_locks` |
+| Update footprint fields from symbols | `update_fields` |
+| Remove footprint fields not found in symbols | `remove_extra_fields` |
+
+The defaults are guarded. They block a change that KiCad makes without a question.
+`PcbUpdateOptions.kicad_dialog()` returns options that act as the dialog does:
+routed contacts may change, a grouped footprint may be deleted, and a blocked part is skipped.
+Pass a check box as a keyword, for example `PcbUpdateOptions.kicad_dialog(delete_extra_footprints=True)`.
+The dialog does not ask about these three cases. Each one still leaves a warning in `issues`.
+
+### Skipped parts
+
+With `skip_blocked_parts`, these problems become warnings for that one part: no Footprint field, a definition not supplied,
+a definition with a different identifier, no placement for a new part, and a locked footprint without `override_locks`.
+A schematic pin with no footprint pad (`missing_pad`) also becomes a warning. KiCad reports it as an error and still applies the update; the pin stays unconnected.
+An existing footprint stays, and its fields, attributes, and pad nets still update, as in KiCad.
+A new part without a footprint is not added.
+Problems for the whole board still block: duplicate footprint identifiers, incomplete electrical coverage, and a copper net split.
+
+### Grouped footprints
+
+With `delete_grouped_footprints`, a deleted footprint leaves each board group that holds it, as in KiCad.
+A group left with no members is removed, because KiCad does not save an empty group.
+That group then leaves its own parent group.
+KiCad keeps such a reference in memory until the board is loaded again, so the first save from KiCad can still list it. The helper removes it at once.
+A generator, such as a tuning pattern, that names the footprint, or names a group that would become empty, still blocks.
+A group that names a child of the footprint, such as a pad, still blocks.
 
 Filters, jumper metadata, unit metadata, component-class fields, and associations update with the physical part.
 A hierarchy also supplies the sheet name and file name.

@@ -140,6 +140,22 @@ for a model you build wrong, which is a different failure.
 `SCHEMATIC` for a symbol inside `lib_symbols`. `to_file` picks it for you. Pass
 it only to a `dump_*` or `write_*` call.
 
+## Electrical content and changes
+
+Use `build_netbom` or `load_netbom` for indexed, board-first electrical content.
+`NetbomDocument`, `NetbomRecord`, `NetbomEvidence`, and `NetbomCoverage` hold results.
+See [netbom](../netbom.md).
+
+`DesignInspector`, `inspect_design`, `open_inspection`, and `portable_inspection_source` query designs.
+See [design inspection](../design-inspection.md) for portable tools and native fields.
+
+`NetbomAssembly` builds a system from board instances and embedded netboms.
+`ConnectorEndpoint`, `ConnectorMate`, `ConnectorMateDefinition`, `ConnectorPinPair`, and `AssemblyEvidence` describe identified connector mates.
+`AssemblyInspector` resolves and inspects system nets. See [netbom assemblies](../netbom-assemblies.md).
+
+`compare_designs` compares two designs as labelled change records: electrical, part, geometry, settings, cosmetic, derived, or other.
+It adds readable item names, a number tolerance, board net records, text views, and a git diff command. See `docs/design-changes.md`.
+
 ## Gaps in this scope
 
 - No unit conversion helper. Millimeters are the only unit the models speak.

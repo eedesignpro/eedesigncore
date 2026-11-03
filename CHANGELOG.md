@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.0] - 2026-11-03
+
+Adds design comparison and the KiCad dialog behaviours of Update PCB from Schematic. There is no 0.42.0.
+
+### Design comparison
+
+- Add `compare_designs`. It compares two boards, schematics, footprints, symbol libraries, or project files.
+- Each change record has a category: electrical, part, geometry, settings, cosmetic, derived, or other.
+- Each record names the item (for example `R12 pad 2`) and the field, with the old and new values.
+- Pads, pins, and fields without identifiers match by number or name, so a pad net change is one record.
+- Add an optional number tolerance. The default stays exact.
+- For a board, add one record per net whose pads, routing, or name changed.
+- Add a short report, a git-style diff, JSON output, and a command that git can use as a diff driver.
+- Translate schematic electrical comparisons and update change lists into the same records.
+- `compare_content` and its records do not change.
+
+### Update PCB from Schematic dialog behaviours
+
+- Add `load_update_footprints`. It loads the footprints a schematic names through a footprint library table, as KiCad does.
+- Add `PcbUpdateOptions.delete_grouped_footprints`. A deleted footprint leaves its board group, and an emptied group is removed.
+- Add `PcbUpdateOptions.skip_blocked_parts`. A part that cannot be replaced or added keeps its old footprint, and the rest applies.
+- Add `PcbUpdateOptions.kicad_dialog()`. It returns options that act as the KiCad 10 Update PCB from Schematic dialog does.
+- Document which option matches each dialog check box. The older association-only update page now points to the full update.
+- With `skip_blocked_parts`, a schematic pin with no footprint pad is a warning, as KiCad applies the update anyway.
+- Fix: a Footprint field with no library name now matches a board footprint by its item name, as KiCad does, so the update does not replace it on every run. It gives a `footprint_without_library` warning.
+- The loader searches every library for a name with no library name, in alphabetical order, as KiCad does.
+- Other defaults do not change.
+
 ## [0.41.0] - 2026-11-03
 
 - Accept stacked pin numbers in design updates, as KiCad 10 does. A library pin numbered `[2,4]` or `[1-3,7]` now puts its net on each listed pad. Before, both update directions refused any schematic with such a pin.

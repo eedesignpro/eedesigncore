@@ -1,7 +1,8 @@
 # Selected schematic-to-PCB updates
 
-These operations update selected board footprints from the schematic.
-They are not a complete replacement for KiCad Update PCB from Schematic.
+This older operation links existing footprints and updates their pad nets only. It does not add, replace, or delete footprints.
+For the full KiCad Update PCB from Schematic, with replace, delete, add, and every dialog check box, use `plan_update_pcb_from_schematic`.
+See [schematic and PCB updates](schematic-pcb-updates.md).
 
 ```python
 from eedesigncore import (

@@ -150,6 +150,20 @@ from eedesigncore.copper_layers import (
     plan_copper_layer_change,
     validate_copper_layer_references,
 )
+from eedesigncore.design_changes import (
+    CHANGE_CATEGORIES,
+    CHANGE_FORMAT,
+    ChangeCategory,
+    ChangeKind,
+    DesignChange,
+    DesignComparison,
+    changes_from_schematic_electrical,
+    changes_from_update,
+    compare_designs,
+    format_change_diff,
+    format_change_report,
+    load_design,
+)
 from eedesigncore.dru import (
     DrcBound,
     DrcClause,
@@ -297,6 +311,7 @@ from eedesigncore.pcb.update_from_schematic import (
     plan_update_pcb_from_schematic,
     update_pcb_from_schematic,
 )
+from eedesigncore.pcb.update_library import UpdateFootprintLoad, load_update_footprints
 from eedesigncore.pro import (
     JsonFloat,
     JsonInt,
@@ -997,3 +1012,20 @@ __all__ += [
 ]
 
 __all__ += ["CreatedSubsheet", "create_sheet_schematic", "create_subsheet"]
+
+__all__ += [
+    "CHANGE_CATEGORIES",
+    "CHANGE_FORMAT",
+    "ChangeCategory",
+    "ChangeKind",
+    "DesignChange",
+    "DesignComparison",
+    "changes_from_schematic_electrical",
+    "changes_from_update",
+    "compare_designs",
+    "format_change_diff",
+    "format_change_report",
+    "load_design",
+]
+
+__all__ += ["UpdateFootprintLoad", "load_update_footprints"]

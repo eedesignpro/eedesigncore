@@ -45,6 +45,10 @@ fp.properties[0].value = "C99"
 fp.to_file("C_0402_1005Metric.kicad_mod")
 ```
 
+Netbom, inspection, assemblies, design changes: `docs/agent/common.md § Electrical content and changes`.
+
+[Design updates](../schematic-pcb-updates.md) (KiCad dialog options) and [symbol updates](../symbol-library-updates.md).
+
 ## The six operations
 
 Import all six from the package root. The model is positional, every other
@@ -78,12 +82,13 @@ Field and return aliases are supported.
 |---|---|
 | Drawing sheets | `DrawingSheet`, `DrawingSheetCoordinate`, `DrawingSheetSetup`, `DrawingSheetItem`, `DrawingSheetGraphics`, `load_wks`, `dump_wks`, `write_wks`, `drawing_sheet_graphics`, `render_drawing_sheet_svg` |
 | Root models | `Footprint`, `SymbolLib`, `Board`, `Schematic`, `ProjectFile`, `ProjectLocalSettings`, `LibTable` |
-| Design updates | `PcbUpdateOptions`, `SchematicUpdateOptions`, `DesignUpdateChange`, `DesignUpdateIssue`, `PcbUpdatePlan`, `PcbUpdateResult`, `SchematicUpdatePlan`, `SchematicUpdateResult`, `plan_update_pcb_from_schematic`, `apply_update_pcb_from_schematic`, `update_pcb_from_schematic`, `plan_update_schematic_from_pcb`, `apply_update_schematic_from_pcb`, `update_schematic_from_pcb` |
+| Design updates | `PcbUpdateOptions`, `SchematicUpdateOptions`, `DesignUpdateChange`, `DesignUpdateIssue`, `PcbUpdatePlan`, `PcbUpdateResult`, `SchematicUpdatePlan`, `SchematicUpdateResult`, `plan_update_pcb_from_schematic`, `apply_update_pcb_from_schematic`, `update_pcb_from_schematic`, `load_update_footprints`, `UpdateFootprintLoad`, `plan_update_schematic_from_pcb`, `apply_update_schematic_from_pcb`, `update_schematic_from_pcb` |
 | Operations | `extract_footprint`, `inject_footprint`, `extract_symbol`, `inject_symbol`, `strip_uuids`, `generate_uuids`, `derive_uuids`, `DERIVED_UUID_NAMESPACE`, `inject_board`, `InjectedContent`, `new_board_from`, `rename_nets`, `rename_footprint_nets`, `extract_fills`, `replace_fills`, `flatten_fills`, `item_layers`, `items_on_layers`, `translate_board`, `translate_footprint`, `translate_items`, `rotate_board`, `rotate_footprint`, `rotate_items`, `set_footprint_orientation`, `flip_footprint`, `flip_board`, `board_bbox`, `footprint_bbox`, `items_bbox` |
 | Loaders and writers | `load_mod`, `dump_mod`, `write_mod`, `load_sym`, `dump_sym`, `write_sym`, `load_pcb`, `dump_board`, `write_board`, `load_sch`, `dump_sch`, `write_sch`, `load_lib_table`, `dump_lib_table`, `write_lib_table`, `parse_json`, `load_pro`, `load_prl`, `dump_json` |
 | S-expression tree | `parse`, `SExprNode`, `SExprNodeType` |
 | Version | `__version__` |
 | Hierarchy | `load_hierarchy`, `SheetHierarchy`, `SheetNode` |
+| Design changes | `compare_designs`, `load_design`, `DesignComparison`, `DesignChange`, `ChangeCategory`, `ChangeKind`, `CHANGE_CATEGORIES`, `CHANGE_FORMAT`, `format_change_report`, `format_change_diff`, `changes_from_update`, `changes_from_schematic_electrical` |
 | Saved net classes | `read_netclass_assignments` |
 | Custom design rules | `DrcFile`, `DrcRule`, `DrcClause`, `DrcConstraint`, `DrcConstraintType`, `DrcBound`, `update_drc_block` |
 | Library tables | `LibTableRow`, `LibTableKind`, `LibTableScope`, `LibTableEnvironment`, `LibTableResolver`, `ResolvedLibTable`, `ResolvedLibrary`, `SkippedLibTable`, `resolve_lib_table`, `qualify_item_name`, `default_user_settings_dir`, `default_kicad_install_root`, `PLACEHOLDER_NICKNAME` |

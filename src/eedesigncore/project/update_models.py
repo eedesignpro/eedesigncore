@@ -26,6 +26,29 @@ class PcbUpdateOptions(KicadModel):
     update_values: bool = True
     refresh_footprints: bool = False
     preserve_routed_contacts: bool = True
+    # KiCad deletes a grouped footprint and takes it out of the group
+    # (board_commit.cpp:352-373). False keeps the older blocker.
+    delete_grouped_footprints: bool = False
+    # KiCad reports a part it cannot replace or add, keeps the old footprint, and
+    # applies the rest (board_netlist_updater.cpp:2156-2180). False blocks instead.
+    skip_blocked_parts: bool = False
+
+    @classmethod
+    def kicad_dialog(cls, **changes: bool) -> PcbUpdateOptions:
+        """Return the options that act as KiCad 10 Update PCB from Schematic does.
+
+        The dialog defaults, plus the three KiCad behaviours the guarded defaults
+        do not have: routed contacts may change, a grouped footprint may be
+        deleted, and a blocked part is skipped. Pass a dialog check box as a
+        keyword, for example ``delete_extra_footprints=True``.
+        """
+        settings: dict[str, bool] = {
+            "preserve_routed_contacts": False,
+            "delete_grouped_footprints": True,
+            "skip_blocked_parts": True,
+        }
+        settings.update(changes)
+        return cls(**settings)
 
 
 class SchematicUpdateOptions(KicadModel):

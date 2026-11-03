@@ -283,8 +283,9 @@ class ResolvedLibTable(KicadModel):
         types, such as ``Database``, need a query engine this library does not
         ship, so they never match (A2 report, OQ-3).
 
-        KiCad never searches for a bare item name. The search order is library
-        policy, stated in ADR-047.
+        This search order is library policy, stated in ADR-047. KiCad 10.0.3
+        searches footprint libraries for a bare name alphabetically instead
+        (``footprint_library_adapter.cpp:334-353``); see ``load_update_footprints``.
         """
         if not item_name or ":" in item_name:
             return None
