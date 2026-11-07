@@ -1029,3 +1029,21 @@ __all__ += [
 ]
 
 __all__ += ["UpdateFootprintLoad", "load_update_footprints"]
+
+from eedesigncore.library import (  # noqa: E402
+    HttpLibraryError,
+    HttpSymbolLibrary,
+    LibrarySymbolLoad,
+    find_symbol,
+    load_library_symbols,
+    table_symbol_loader,
+)
+
+__all__ += [
+    "HttpLibraryError",
+    "HttpSymbolLibrary",
+    "LibrarySymbolLoad",
+    "find_symbol",
+    "load_library_symbols",
+    "table_symbol_loader",
+]

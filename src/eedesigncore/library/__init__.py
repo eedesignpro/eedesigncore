@@ -21,10 +21,14 @@ and does not judge a part.
 """
 
 from eedesigncore.library.catalog import (
+    LibrarySymbolLoad,
+    find_symbol,
     iter_library_records,
     iter_symbol_library,
     iter_table_records,
     library_item_names,
+    load_library_symbols,
+    table_symbol_loader,
 )
 from eedesigncore.library.database import (
     database_records,
@@ -43,6 +47,17 @@ from eedesigncore.library.dbl import (
     load_kicad_dbl,
     sanitize_database_key,
 )
+from eedesigncore.library.http import (
+    HttpCategory,
+    HttpLibraryConnection,
+    HttpLibraryError,
+    HttpLibrarySettings,
+    HttpLibrarySource,
+    HttpPart,
+    HttpPartSymbol,
+    HttpSymbolLibrary,
+    symbol_from_http_part,
+)
 from eedesigncore.library.records import PartRecord, PartSource
 from eedesigncore.library.search import (
     DEFAULT_FIELD_WEIGHT,
@@ -59,6 +74,19 @@ from eedesigncore.library.search import (
 )
 
 __all__ = [
+    "HttpCategory",
+    "HttpLibraryConnection",
+    "HttpLibraryError",
+    "HttpLibrarySettings",
+    "HttpLibrarySource",
+    "HttpPart",
+    "HttpPartSymbol",
+    "HttpSymbolLibrary",
+    "LibrarySymbolLoad",
+    "find_symbol",
+    "load_library_symbols",
+    "symbol_from_http_part",
+    "table_symbol_loader",
     "DEFAULT_FIELD_WEIGHT",
     "DatabaseCache",
     "DatabaseDeclaration",

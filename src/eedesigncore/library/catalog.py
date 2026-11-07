@@ -24,17 +24,28 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
+from urllib.parse import urlsplit
 
+from eedesigncore.common.base import KicadModel
 from eedesigncore.common.sch_family.symbol import Symbol
 from eedesigncore.exceptions import KicadParseError
 from eedesigncore.library.records import PartRecord
+from eedesigncore.project.hierarchy import SheetHierarchy
+from eedesigncore.sch.models import Schematic
 from eedesigncore.sym.models import SymbolLib
 from eedesigncore.tables.resolver import (
+    HTTP_ROW_TYPE,
     KICAD_ROW_TYPE,
     ResolvedLibrary,
     ResolvedLibTable,
     symbol_library_files,
 )
+
+if TYPE_CHECKING:
+    from eedesigncore.library.http import HttpSymbolLibrary
+
+SymbolLoader = Callable[[str], Symbol | None]
 
 
 def iter_symbol_library(
@@ -73,16 +84,19 @@ def iter_library_records(
     *,
     nickname: str | None = None,
     strict: bool = False,
+    symbol_loader: SymbolLoader | None = None,
 ) -> Iterator[PartRecord]:
     """Yield one :class:`PartRecord` per definition in one symbol library.
 
     ``library`` is a resolved table row, which supplies the nickname, or a bare
     path, which does not. A bare path takes ``nickname`` when given.
 
-    A row whose ``type`` is not ``KiCad`` yields nothing. A ``Database`` row
-    needs rows a caller supplies, per
-    :mod:`eedesigncore.library.database`; this library never connects
-    (operator ruling Q24).
+    An ``HTTP`` row, or a ``.kicad_httplib`` path, reads its server and yields
+    every part, as KiCad lists them; *symbol_loader* resolves each part's base
+    symbol (see :func:`table_symbol_loader`). A server error raises
+    :class:`~eedesigncore.library.http.HttpLibraryError`. Any other row type,
+    such as ``Database``, yields nothing: a database library needs rows a
+    caller supplies, per :mod:`eedesigncore.library.database`.
 
     A row outside its own read confinement also yields nothing. The check is
     :attr:`ResolvedLibrary.read_allowed`, which travels with the row, so
@@ -90,7 +104,7 @@ def iter_library_records(
     resolver refused.
     """
     if isinstance(library, ResolvedLibrary):
-        if library.type != KICAD_ROW_TYPE:
+        if library.type not in (KICAD_ROW_TYPE, HTTP_ROW_TYPE):
             return
         if not library.read_allowed:
             # The row carries its own confinement, so no caller can forget to
@@ -104,6 +118,18 @@ def iter_library_records(
         path = Path(library)
         resolved_nickname = nickname or ""
 
+    is_http = (
+        library.type == HTTP_ROW_TYPE
+        if isinstance(library, ResolvedLibrary)
+        else path.suffix == ".kicad_httplib"
+    )
+    if is_http:
+        http = _http_library(path, resolved_nickname, symbol_loader)
+        for built, _category in http.iter_symbols():
+            yield PartRecord.from_symbol(
+                built.definition, nickname=resolved_nickname, source_path=str(path)
+            )
+        return
     for symbol, file in iter_symbol_library(path, strict=strict):
         yield PartRecord.from_symbol(symbol, nickname=resolved_nickname, source_path=str(file))
 
@@ -121,9 +147,12 @@ def iter_table_records(
     project tier comes before the global tier, which is the order KiCad loads
     plugins in (``library_manager.cpp:1543-1551``).
 
+    ``HTTP`` rows read their servers, so an HTTP library of 100000 parts makes
+    the walk read about 75 MB; pass ``nicknames`` to leave it out.
+
     Three kinds of row contribute nothing and raise nothing:
 
-    - a row whose ``type`` is not ``KiCad``, such as a ``Database`` row,
+    - a row whose ``type`` is not ``KiCad`` or ``HTTP``, such as a ``Database`` row,
     - a row outside the read confinement, which
       :meth:`ResolvedLibTable.scan_allowed` refuses, and
     - a row whose path does not exist.
@@ -136,14 +165,17 @@ def iter_table_records(
 
     wanted = None if nicknames is None else set(nicknames)
 
+    loader = table_symbol_loader(table)
     for library in table.search_order(include_disabled=include_disabled):
-        if library.type != KICAD_ROW_TYPE:
+        if library.type not in (KICAD_ROW_TYPE, HTTP_ROW_TYPE):
             continue
         if wanted is not None and library.nickname not in wanted:
             continue
         if not table.scan_allowed(library):
             continue
-        yield from iter_library_records(library, strict=strict)
+        if library.type == HTTP_ROW_TYPE:
+            _check_http_scope(library)
+        yield from iter_library_records(library, strict=strict, symbol_loader=loader)
 
 
 def library_item_names(
@@ -169,26 +201,40 @@ def library_item_names(
 def find_symbol(table: ResolvedLibTable, lib_id: str) -> Symbol | None:
     """Return the definition named by ``<nickname>:<name>``, or ``None``.
 
-    The nickname must resolve in *table*, the row must be a ``KiCad`` row, and
-    the library must be inside the read confinement. Anything else returns
-    ``None``: a database library cannot be resolved without rows a caller
-    supplies, and a confinement miss stays indistinguishable from an absent
-    part.
+    The nickname must resolve in *table*, the row must be a ``KiCad`` or an
+    ``HTTP`` row, and the library must be inside the read confinement. Anything
+    else returns ``None``: a database library cannot be resolved without rows a
+    caller supplies, and a confinement miss stays indistinguishable from an
+    absent part. An HTTP library asks its server, and a server error raises
+    :class:`~eedesigncore.library.http.HttpLibraryError`.
 
     A folder-form library yields its definitions in sorted file order, so a
     name defined in two files resolves to the LAST one, which is the winner
     KiCad's shared name map also ends up with
     (``sch_io_kicad_sexpr_lib_cache.cpp:145-170``).
     """
+    return _find_symbol(table, lib_id, None)
+
+
+def _find_symbol(
+    table: ResolvedLibTable, lib_id: str, http: dict[str, HttpSymbolLibrary] | None
+) -> Symbol | None:
     nickname, separator, name = lib_id.partition(":")
     if not separator or not nickname or not name:
         return None
-
     library = table.get(nickname)
-    if library is None or library.type != KICAD_ROW_TYPE:
+    if library is None or library.type not in (KICAD_ROW_TYPE, HTTP_ROW_TYPE):
         return None
     if not table.scan_allowed(library):
         return None
+    if library.type == HTTP_ROW_TYPE:
+        cache = {} if http is None else http
+        if nickname not in cache:
+            _check_http_scope(library)
+            cache[nickname] = _http_library(
+                library.path, nickname, lambda base: _find_symbol(table, base, cache)
+            )
+        return cache[nickname].load_symbol(name)
 
     found: Symbol | None = None
     for symbol, _file in iter_symbol_library(library.path):
@@ -201,12 +247,109 @@ def table_symbol_loader(table: ResolvedLibTable) -> Callable[[str], Symbol | Non
     """Return a symbol loader bound to *table*, for the database transform.
 
     This is what :func:`eedesigncore.library.database.definition_from_row`
-    calls to resolve a row's symbol reference. It parses the library on every
-    call and holds no cache, per operator ruling Q24, so a caller placing many
-    parts from the same library should wrap it in its own memo.
+    calls to resolve a row's symbol reference. ``KiCad`` and ``HTTP`` rows are
+    read. The loader keeps each result, each HTTP library and each base symbol
+    for its own life and returns a copy each time; nothing outlives it. Make a
+    new loader to see library changes.
     """
 
+    http: dict[str, HttpSymbolLibrary] = {}
+    found: dict[str, Symbol | None] = {}
+
     def load(lib_id: str) -> Symbol | None:
-        return find_symbol(table, lib_id)
+        # An HTTP library and the base symbols its parts name are kept for the
+        # life of the loader: 100 parts on one base symbol parse it once.
+        if lib_id not in found:
+            found[lib_id] = _find_symbol(table, lib_id, http)
+        symbol = found[lib_id]
+        return None if symbol is None else symbol.model_copy(deep=True)
 
     return load
+
+
+_LOOPBACK = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
+def _check_http_scope(library: ResolvedLibrary) -> None:
+    """A project row may name only a server on this computer.
+
+    A global row is the user's own configuration and may name any server. A
+    project is often a repository the user did not write, so its HTTP library
+    connects only to a loopback address.
+    """
+    if library.scope == "global":
+        return
+    from eedesigncore.library.http import HttpLibraryError, HttpLibrarySettings
+
+    host = urlsplit(HttpLibrarySettings.from_file(library.path).source.root_url).hostname or ""
+    if host.lower() not in _LOOPBACK:
+        raise HttpLibraryError(
+            f"The project library '{library.nickname}' names the server {host}. A project "
+            "HTTP library may name only this computer; move the row to the global table."
+        )
+
+
+def _http_library(path: Path, nickname: str, loader: SymbolLoader | None) -> HttpSymbolLibrary:
+    from eedesigncore.library.http import HttpSymbolLibrary
+
+    return HttpSymbolLibrary.from_file(path, nickname=nickname, symbol_loader=loader)
+
+
+class LibrarySymbolLoad(KicadModel):
+    """The library definitions found, keyed by library id, and the reason for each one not found.
+
+    Pass ``symbols`` to the symbol library update as ``library_symbols``.
+    """
+
+    symbols: dict[str, Symbol] = {}
+    missing: dict[str, str] = {}
+
+
+def load_library_symbols(
+    source: Schematic | SheetHierarchy | Iterable[str], lib_table: ResolvedLibTable
+) -> LibrarySymbolLoad:
+    """Load the library definition of every library id, through *lib_table*.
+
+    *source* is a schematic or a hierarchy, whose placed symbols name the ids,
+    or the ids themselves. ``KiCad`` and ``HTTP`` rows are read, as KiCad's
+    Update Symbols from Library reads them. A server error of an HTTP library
+    is reported in ``missing``, not raised.
+
+    Raises:
+        ValueError: when *lib_table* is a footprint table.
+    """
+    from eedesigncore.library.http import HttpLibraryError
+    from eedesigncore.project._update_common import placed_symbols
+
+    if lib_table.kind != "sym":
+        raise ValueError("load_library_symbols needs a 'sym' library table, got an 'fp' one.")
+    if isinstance(source, Schematic | SheetHierarchy):
+        wanted = sorted({symbol.lib_id for _, symbol in placed_symbols(source).values()})
+    else:
+        wanted = sorted(set(source))
+    loader = table_symbol_loader(lib_table)
+    found: dict[str, Symbol] = {}
+    missing: dict[str, str] = {}
+    for lib_id in wanted:
+        nickname = lib_id.partition(":")[0]
+        library = lib_table.get(nickname)
+        if library is None:
+            missing[lib_id] = f"The library table has no library '{nickname}'."
+            continue
+        if library.type not in (KICAD_ROW_TYPE, HTTP_ROW_TYPE):
+            missing[lib_id] = f"The library '{nickname}' has type '{library.type}'."
+            continue
+        if not lib_table.scan_allowed(library):
+            missing[lib_id] = f"The library '{nickname}' is outside the allowed folders."
+            continue
+        try:
+            symbol = loader(lib_id)
+        except HttpLibraryError as error:
+            missing[lib_id] = str(error)
+            continue
+        if symbol is None:
+            name = lib_id.partition(":")[2]
+            missing[lib_id] = f"The library '{nickname}' has no symbol '{name}'."
+        else:
+            found[lib_id] = symbol
+    return LibrarySymbolLoad(symbols=found, missing=missing)

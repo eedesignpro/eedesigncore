@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.45.0] - 2026-11-07
+
+Read KiCad HTTP libraries, as KiCad 10 does (operator ruling 2026-11-07: eedesigncore connects to an HTTP library server itself).
+
+- `find_symbol`, `table_symbol_loader` and `iter_library_records` read `HTTP` rows of a symbol library table. A part's symbol is its base symbol (`symbolIdStr`), renamed to the part name, with the part's fields, footprint filters, keywords and exclusion flags, as `SCH_IO_HTTP_LIB::loadSymbolFromPart` builds it.
+- Add `load_library_symbols`: the library definition of every symbol a schematic names, KiCad and HTTP rows alike, with the reason for each one not found. Pass `symbols` to the symbol library update.
+- Add `eedesigncore.library.http`: `HttpSymbolLibrary`, `HttpLibraryConnection`, `HttpLibrarySettings` and `HttpLibraryError`.
+- A table symbol loader keeps each HTTP library and each base symbol for its life, so many parts on one base symbol parse it once. It returns a copy each time.
+- A global HTTP row may name any server. A project HTTP row may name only this computer.
+- Export `find_symbol` and `table_symbol_loader` from the package.
+
 ## [0.44.0] - 2026-11-07
 
 Fixes from the mag probe board migration: Update PCB from Schematic now accepts that board as KiCad does.

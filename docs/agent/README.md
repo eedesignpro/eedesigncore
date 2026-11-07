@@ -104,7 +104,7 @@ Field and return aliases are supported.
 | Symbol library updates | `SymbolFieldUpdatePolicy`, `SymbolFieldUpdateOptions`, `SymbolAttributeUpdateOptions`, `SymbolLibraryUpdateOptions`, `SymbolLibraryUpdateTarget`, `SymbolLibraryUpdateIssue`, `SymbolLibraryFieldChange`, `SymbolLibraryPinChange`, `SymbolLibraryChange`, `SymbolLibraryUpdatePlan`, `SymbolLibraryUpdateResult`, `plan_symbol_library_updates`, `apply_symbol_library_updates`, `select_symbol_library_targets`, `update_symbol_from_library`, `change_symbol` |
 | Schematic members | `PlacedSymbol`, `PlacedSymbolPin`, `InstancePath`, `InstanceProject`, `InstanceVariant`, `InstanceVariantField`, `Junction`, `NoConnect`, `BusEntry`, `Line`, `SchText`, `Label`, `SchTextBox`, `RuleArea`, `Image`, `Group`, `SchTable`, `SchTableCell`, `Sheet`, `SheetPin`, `SheetVariant`, `SheetVariantField`, `SheetInstancePath`, `SheetInstanceProject`, `SheetInstances`, `RootInstancePath` |
 | Exceptions | `KicadParseError`, `EmbeddedFileChecksumError`, `LibTableResolutionError`, `SheetHierarchyError`, `ZstdBackendUnavailableError`, `ZstdDecompressionError` |
-| Part navigation | `PartRecord`, `PartMatch`, `MatchReason`, `FieldTest`, `search_records`, `library_item_names`, `iter_library_records`, `iter_table_records` |
+| Part navigation | `PartRecord`, `PartMatch`, `MatchReason`, `FieldTest`, `search_records`, `library_item_names`, `iter_library_records`, `iter_table_records`, `find_symbol`, `table_symbol_loader`, `load_library_symbols`, `LibrarySymbolLoad`, `HttpSymbolLibrary`, `HttpLibraryError` |
 | Part databases | `load_kicad_dbl`, `DatabaseLibrary`, `DatabaseDeclaration`, `DatabaseSubLibrary`, `DatabaseTableRead`, `DatabaseFieldMapping`, `DatabaseProperties`, `DatabaseSource`, `DatabaseCache`, `definition_from_row`, `record_from_row`, `database_records` |
 | Electrical inspection, `docs/schematic-electrical-inspection.md` | `append_global_label_netclasses`, `inspect_schematic_electrical`, `compare_schematic_electrical`, `SchematicClassEvidence`, `SchematicElectricalNet`, `SchematicElectricalLabel`, `SchematicElectricalPart`, `SchematicElectricalSnapshot`, `SchematicElectricalChange`, `SchematicElectricalComparison` |
 | Guarded saves | `SourceSnapshot`, `GuardedDocument`, `GuardedFileResult`, `GuardedSaveResult`, `GuardedSaveError`, `load_guarded_document`, `save_guarded_documents` |
@@ -127,19 +127,19 @@ Field and return aliases are supported.
 ### Finding a part
 
 `resolve_lib_table` answers "which library holds this exact name".
-`eedesigncore.library` answers "what is in this library" and "which of these
-parts fits". A symbol library may be one `.kicad_sym` file or a folder with
-one file per part. Both are read.
+`eedesigncore.library` answers "what is in this library" and "which part
+fits". A symbol library is a `.kicad_sym` file or a folder of them.
 
 `search_records` uses KiCad search weights. Every field is searchable.
 It does not read `key>10k` as a number. Matches report their reasons.
 
+An `HTTP` row is read from its server
+(`docs/operations.md § Read an HTTP library`).
+
 A `Database` row needs rows a caller supplies. `load_kicad_dbl` reports the
 driver, tables, and columns that a `.kicad_dbl` file names. Your code connects,
-runs the query, and passes the rows in. **This library never connects, never
-writes SQL, and never holds a credential.** SQL quoting depends on the driver.
-Each password in a connection string becomes `<withheld>`. The library decides
-how part information lands in a schematic, not which part to use. See
+runs the query, and passes the rows in. **It never connects to a database,
+writes SQL, or holds its credential.** A password becomes `<withheld>`. See
 `docs/operations.md § Finding a part`.
 
 ## Not implemented
@@ -149,6 +149,7 @@ how part information lands in a schematic, not which part to use. See
 | Automatic project drawing-sheet lookup | Not planned. Supply the template explicitly |
 | Copper-island reconstruction | Not implemented |
 | Design updates with assembly variants | Not implemented |
+| Updates where a saved unit differs from the placed unit | Not implemented |
 | KiCad netlist file export | Not planned. Use `kicad-cli` |
 | ERC checking | Not planned |
 | DRC checking | Not planned. Use `kicad-cli` |

@@ -931,11 +931,50 @@ kind (exact, prefix or substring) and the points, so a tool can tell an
 engineer "matched Tolerance = 1% and Package = 0201" instead of just handing
 over a part number.
 
+### Read an HTTP library
+
+An `HTTP` row in a `sym-lib-table` names a `.kicad_httplib` file, which names
+a REST server. eedesigncore reads it the way KiCad 10 does
+(`sch_io_http_lib.cpp`): `find_symbol`, `table_symbol_loader`,
+`load_library_symbols` and `iter_library_records` all accept `HTTP` rows.
+
+```python
+import eedesigncore as e
+
+table = e.resolve_lib_table("sym", project_dir=project)
+symbol = e.find_symbol(table, "JLCPCB:C11702__1")
+
+# Every definition a schematic names, KiCad and HTTP rows alike, for an update.
+load = e.load_library_symbols(e.load_hierarchy(project / "board.kicad_pro"), table)
+load.symbols   # library id -> Symbol; pass as library_symbols
+load.missing   # library id -> reason
+```
+
+Each part names a base symbol (`symbolIdStr`) in another library row. The
+symbol is that base, renamed to the part name, with the part's fields. The
+`footprint` field gives the Footprint field its first token and every token
+to the footprint filters. `Value`, `Datasheet`, `Description` and `Reference`
+fill the built-in fields; `keywords` sets the keywords; any other name finds or
+adds a user field. Each field keeps the server's visibility. A missing base
+gives the fields and no body, as KiCad does: test `has_pins` on
+`HttpSymbolLibrary.load(name)`, or check the pins before you place.
+
+A lookup reads the part record of the same id first, so one symbol costs one
+request. A name that differs from its id is found through the category
+listings, as KiCad finds it. `iter_library_records` reads every listing: about
+75 MB for a library of 100000 parts.
+
+A server error, a bad token or bad settings raise `HttpLibraryError`;
+`load_library_symbols` reports them in `missing` instead. A global row may name
+any server, because the global table is your own configuration. A project row
+may name only this computer (`localhost`, `127.0.0.1`, `::1`), because a project
+is often a repository you did not write.
+
 ### Read a part database
 
 A `Database` row in a `sym-lib-table` points at a `.kicad_dbl` file, which
-declares an ODBC or SQLite source. **This library never connects.** It reads
-the declaration, names the driver you need, and stops.
+declares an ODBC or SQLite source. **This library never connects to a
+database.** It reads the declaration, names the driver you need, and stops.
 
 ```python
 import json

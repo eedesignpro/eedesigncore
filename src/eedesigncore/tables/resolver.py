@@ -75,6 +75,7 @@ TABLE_TYPE_NAME: Final = "Table"
 """The row type that marks a nested table (``library_table.cpp:34``)."""
 
 KICAD_ROW_TYPE: Final = "KiCad"
+HTTP_ROW_TYPE: Final = "HTTP"
 """The row type of a plain on-disk library."""
 
 PLACEHOLDER_NICKNAME: Final = "eedesigncore"
@@ -688,7 +689,7 @@ class LibTableResolver(KicadModel):
         """
         if library.scope != "global":
             return project_roots
-        if not self.trust_table_chain or library.type != KICAD_ROW_TYPE:
+        if not self.trust_table_chain or library.type not in (KICAD_ROW_TYPE, HTTP_ROW_TYPE):
             return global_roots
         if is_unc_path(library.uri) or has_uri_scheme(library.uri):
             return global_roots
