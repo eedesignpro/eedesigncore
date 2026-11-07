@@ -53,14 +53,6 @@ def validate_inputs(
                 "The saved occurrence unit differs from the placed symbol unit.",
                 document,
             )
-        if sheet.rule_areas:
-            issue(
-                issues,
-                "rule_area_metadata",
-                "Design updates do not support rule-area population "
-                "or component-class inheritance.",
-                document,
-            )
         if any(symbol.uuid is None for symbol in sheet.symbols) or any(
             count > 1 for count in Counter(symbol.uuid for symbol in sheet.symbols).values()
         ):

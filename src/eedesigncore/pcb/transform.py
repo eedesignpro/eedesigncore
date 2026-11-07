@@ -245,8 +245,8 @@ def _rotate_footprint(footprint: Footprint, rotation: Rotation) -> None:
 
     * ``at`` position turns about the rotation centre;
     * ``at`` angle takes the turn, normalised to ``(-180, 180]``;
-    * every pad angle takes the turn, with NO normalisation
-      (``PADSTACK::SetOrientation``, padstack.h:345, stores it raw);
+    * every pad angle takes the turn, normalised to ``[0, 360)``
+      (``PADSTACK::SetOrientation``, padstack.h:348-352, 10.0 branch);
     * every text and field angle takes the turn, normalised to ``[0, 360)``,
       then ``KeepUpright``;
     * every footprint-local position and every text-box angle stays put,
@@ -275,7 +275,7 @@ def _rotate_footprint(footprint: Footprint, rotation: Rotation) -> None:
     footprint.at.angle = normalize_angle_180(footprint.at.angle + rotation.angle)
 
     for pad in footprint.pads:
-        pad.angle = pad.angle + rotation.angle
+        pad.angle = normalize_angle(pad.angle + rotation.angle)
 
     for child in footprint_board_frame_children(footprint):
         rotate_item(child, rotation)
@@ -326,7 +326,7 @@ def set_footprint_orientation(footprint: Footprint, angle: float) -> None:
     about_placement = Rotation(delta, center=footprint.at.position)
 
     for pad in footprint.pads:
-        pad.angle = pad.angle + delta
+        pad.angle = normalize_angle(pad.angle + delta)
     for child in footprint_board_frame_children(footprint):
         rotate_item(child, about_placement)
     for item in footprint.drawings:
@@ -500,7 +500,7 @@ def _flip_footprint_top_bottom(footprint: Footprint, center: Point, opposites: L
         # negated. PAD::Flip negates the footprint-relative orientation while
         # the parent orientation reads zero (pad.cpp:1487), and the parent
         # orientation is itself negated, so the two cancel to a plain negation.
-        pad.angle = -pad.angle
+        pad.angle = normalize_angle(-pad.angle)
         if pad.rect_delta is not None:
             pad.rect_delta = _flip_local_y(pad.rect_delta)
         if pad.drill is not None and pad.drill.offset is not None:

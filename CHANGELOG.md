@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.0] - 2026-11-07
+
+Fixes from the mag probe board migration: Update PCB from Schematic now accepts that board as KiCad does.
+
+- Read a library that a direct row of the global library table names by a local absolute path, outside the KiCad folders. A parts library folder, one file per symbol or a footprint folder, was refused, so symbols loaded without pins and the update found no footprint. A project row, a network path, and a path from a project text variable stay refused. `trust_table_chain=False` refuses them all.
+- Accept schematic rule areas in both update directions. A directive on the border gives its net classes to the nets inside and its component classes to the symbols inside and under a sheet inside, as KiCad 10 does.
+- Join the pins of a jumper group into one net, as KiCad does. Their pads take that net. Pins of one number join when duplicate pin numbers are jumpers.
+- Store pad angles from 0 to 360 degrees after a turn, flip, or replacement, as KiCad does. A replaced footprint turned to -90 degrees no longer reports every pad as a changed routed contact.
+- With `preserve_routed_contacts=False`, as in `kicad_dialog()`, a split copper net is a warning: the pads take their nets and the copper keeps its own, as in KiCad.
+- Add `PcbUpdateOptions.refresh_references` to refresh only the named references from the library.
+- Keep the footprint identifier the schematic names on a replaced footprint. A bare name gained the placeholder library `eedesigncore:`.
+
 ## [0.43.0] - 2026-11-03
 
 Adds design comparison and the KiCad dialog behaviours of Update PCB from Schematic. There is no 0.42.0.

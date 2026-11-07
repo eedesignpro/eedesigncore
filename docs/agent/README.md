@@ -149,7 +149,6 @@ how part information lands in a schematic, not which part to use. See
 | Automatic project drawing-sheet lookup | Not planned. Supply the template explicitly |
 | Copper-island reconstruction | Not implemented |
 | Design updates with assembly variants | Not implemented |
-| Design updates with rule-area inheritance | Not implemented |
 | KiCad netlist file export | Not planned. Use `kicad-cli` |
 | ERC checking | Not planned |
 | DRC checking | Not planned. Use `kicad-cli` |

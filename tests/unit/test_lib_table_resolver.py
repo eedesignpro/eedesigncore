@@ -647,9 +647,11 @@ class TestFolderFormSymbolLibrary:
         settings = tmp_path / "settings"
         _write_table(settings, [_row("Shut", str(folder))], kind="sym")
 
-        table = _resolver(settings_dir=settings, kicad_root=tmp_path / "KiCad" / "10.0").resolve(
-            "sym"
-        )
+        table = _resolver(
+            settings_dir=settings,
+            kicad_root=tmp_path / "KiCad" / "10.0",
+            trust_table_chain=False,
+        ).resolve("sym")
 
         assert table.nickname_for("SECRET") is None
 
@@ -812,7 +814,7 @@ class TestLibraryScanConfinement:
         library = _pretty(tmp_path / "outside", "Caps", "PART")
         _write_table(settings, [_row("Capacitor_SMD", str(library))])
 
-        table = _resolver(settings_dir=settings).resolve("fp")
+        table = _resolver(settings_dir=settings, trust_table_chain=False).resolve("fp")
 
         assert table.nickname_for("PART") is None
         assert table.get("Capacitor_SMD") is not None
@@ -832,7 +834,7 @@ class TestLibraryScanConfinement:
 
         monkeypatch.setattr(resolver_module, "read_text_capped", spy)
 
-        table = _resolver(settings_dir=settings).resolve("sym")
+        table = _resolver(settings_dir=settings, trust_table_chain=False).resolve("sym")
 
         assert table.nickname_for("R") is None
         assert str(library) not in read
@@ -1070,3 +1072,77 @@ class TestQualifyItemName:
 
     def test_no_table_falls_back_to_the_placeholder(self) -> None:
         assert qualify_item_name("Ghost") == f"{PLACEHOLDER_NICKNAME}:Ghost"
+
+
+class TestGlobalRowTrust:
+    """A direct GLOBAL row reads its own local library path (0.41.0, amendment 4)."""
+
+    def test_a_global_folder_library_outside_the_roots_resolves(self, tmp_path: Path) -> None:
+        from eedesigncore.library.catalog import find_symbol
+
+        folder = _symbol_folder_lib(tmp_path / "outside", "JLC_Amps", "LM2902", "TL072")
+        settings = tmp_path / "settings"
+        _write_table(settings, [_row("JLC_Amps", str(folder))], kind="sym")
+
+        table = _resolver(settings_dir=settings, kicad_root=tmp_path / "KiCad" / "10.0").resolve(
+            "sym"
+        )
+
+        assert table.nickname_for("LM2902") == "JLC_Amps"
+        symbol = find_symbol(table, "JLC_Amps:LM2902")
+        assert symbol is not None
+        assert symbol.name == "LM2902"
+
+    def test_the_trust_reaches_only_the_row_path(self, tmp_path: Path) -> None:
+        trusted = _symbol_lib(tmp_path / "outside", "Device", "R")
+        neighbour = _symbol_lib(tmp_path / "outside", "Other", "C")
+        settings = tmp_path / "settings"
+        _write_table(settings, [_row("Device", str(trusted))], kind="sym")
+
+        table = _resolver(settings_dir=settings).resolve("sym")
+        library = table.get("Device")
+
+        assert library is not None
+        assert library.read_allowed
+        stray = library.model_copy(update={"uri": str(neighbour)})
+        assert not stray.read_allowed
+
+    def test_a_project_row_outside_the_project_stays_refused(self, tmp_path: Path) -> None:
+        settings = tmp_path / "settings"
+        settings.mkdir()
+        project = tmp_path / "proj"
+        outside = _symbol_lib(tmp_path / "elsewhere", "Other", "R")
+        _write_table(project, [_row("Other", str(outside))], kind="sym")
+
+        table = _resolver(settings_dir=settings, project_dir=project).resolve("sym")
+
+        assert table.nickname_for("R") is None
+
+    def test_a_path_a_project_text_variable_names_stays_refused(self, tmp_path: Path) -> None:
+        """A project must not name a global row's read root (amendment 5)."""
+        library = _symbol_lib(tmp_path / "outside", "Device", "R")
+        settings = tmp_path / "settings"
+        project = tmp_path / "proj"
+        project.mkdir()
+        _write_table(settings, [_row("Device", "${STEER}/Device.kicad_sym")], kind="sym")
+
+        table = LibTableResolver.discover(
+            settings_dir=settings,
+            project_dir=project,
+            kicad_root=tmp_path / "KiCad" / "10.0",
+            env={},
+            project_text_variables={"STEER": str(library.parent)},
+        ).resolve("sym")
+
+        assert table.get("Device") is not None
+        assert table.nickname_for("R") is None
+
+    def test_a_unc_global_row_stays_refused(self, tmp_path: Path) -> None:
+        settings = tmp_path / "settings"
+        _write_table(settings, [_row("Remote", r"\server\share\Remote.kicad_sym")], kind="sym")
+
+        table = _resolver(settings_dir=settings).resolve("sym")
+        library = table.get("Remote")
+
+        assert library is not None
+        assert not library.read_allowed

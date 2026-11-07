@@ -921,19 +921,115 @@ def test_source_group_identity_cannot_collide_with_board_descendant(collision):
     assert "group_identity_collision" in {issue.code for issue in plan.blockers}
 
 
-@pytest.mark.parametrize("direction", ["forward", "reverse"])
-def test_rule_area_metadata_is_explicitly_blocked(direction):
+def rule_area_design(component_class="RF", netclass="50R"):
+    """The test design inside one rule area with one directive on its border."""
+    from eedesigncore.common.sch_family.shapes import SchPolyline
     from eedesigncore.sch.models import RuleArea
 
     board, sch = design()
-    sch.rule_areas.append(RuleArea())
+    sch.rule_areas.append(
+        RuleArea(shape=SchPolyline(pts=[(20.0, 20.0), (35.0, 20.0), (35.0, 30.0), (20.0, 30.0)]))
+    )
+    fields = [Property(name="Netclass", value=netclass)] if netclass else []
+    if component_class:
+        fields.append(Property(name="Component Class", value=component_class))
+    sch.labels.append(
+        Label(
+            kind=LabelKind.netclass_flag,
+            content="",
+            position=(20.0, 25.0),
+            uuid=uid("directive"),
+            fields=fields,
+        )
+    )
+    return board, sch
+
+
+@pytest.mark.parametrize("direction", ["forward", "reverse"])
+def test_rule_areas_do_not_block_either_direction(direction):
+    board, sch = rule_area_design()
     planner = (
         plan_update_pcb_from_schematic
         if direction == "forward"
         else plan_update_schematic_from_pcb
     )
     plan = planner(board, sch)
-    assert "rule_area_metadata" in {issue.code for issue in plan.blockers}
+    assert "rule_area_metadata" not in {issue.code for issue in plan.issues}
+
+
+def test_rule_area_component_class_reaches_the_footprint():
+    board, sch = rule_area_design()
+    result = update_pcb_from_schematic(board, sch)
+    assert result.board.footprints[0].component_classes.classes == ["RF"]
+
+
+def test_rule_area_outside_the_symbol_adds_no_component_class():
+    board, sch = rule_area_design()
+    sch.rule_areas[0].shape.pts = [(100.0, 100.0), (110.0, 100.0), (110.0, 110.0), (100.0, 110.0)]
+    sch.labels[-1].position = (100.0, 105.0)
+    result = update_pcb_from_schematic(board, sch)
+    assert result.board.footprints[0].component_classes is None
+
+
+def test_rule_area_net_class_reaches_the_nets_inside():
+    from eedesigncore.schematic_view.inspection import inspect_schematic_electrical
+
+    _board, sch = rule_area_design(component_class="")
+    inspection = inspect_schematic_electrical(sch, document_id="rule-area")
+    names = {net.name: net.class_names for net in inspection.nets.values()}
+    assert "50R" in names["NET_A"] and "50R" in names["NET_B"]
+    assert not any(
+        "Rule-area" in text or "no resolved target" in text for text in inspection.class_issues
+    )
+
+
+@pytest.mark.parametrize("form", ["groups", "duplicates"])
+def test_jumper_pins_share_the_net_of_their_group(form):
+    board, sch = design()
+    definition = sch.lib_symbols[0]
+    if form == "groups":
+        definition.jumper_pin_groups = [["1", "2"]]
+    else:
+        definition.units[0].items[1].number = "1"
+        definition.duplicate_pin_numbers_are_jumpers = True
+        board.footprints[0].pads[1].number = "1"
+    sch.labels.pop(1)
+    board.footprints[0].pads[1].net_name = None
+    result = update_pcb_from_schematic(board, sch)
+    assert [pad.net_name for pad in result.board.footprints[0].pads] == ["NET_A", "NET_A"]
+
+
+def test_identical_replacement_of_a_turned_footprint_keeps_routed_contacts():
+    board, sch = design()
+    fp = board.footprints[0]
+    fp.at = FootprintPlacement(position=(50, 60), angle=-90)
+    for pad in fp.pads:
+        pad.angle = 270.0
+    board.tracks.append(TrackSegment(start=(50, 60), end=(51, 60), net="NET_A"))
+    library = fp.model_copy(deep=True)
+    library.at = FootprintPlacement(position=(0, 0), angle=0)
+    library.fp_id = "Test:Other"
+    for pad in library.pads:
+        pad.angle = 0.0
+    sch.symbols[0].fields[2].value = "Test:Other"
+    plan = plan_update_pcb_from_schematic(board, sch, library_footprints={"Test:Other": library})
+    assert "routed_contact" not in {issue.code for issue in plan.issues}
+    result = apply_update_pcb_from_schematic(
+        board, sch, plan, library_footprints={"Test:Other": library}
+    )
+    assert [pad.angle for pad in result.board.footprints[0].pads] == [270.0, 270.0]
+
+
+def test_copper_split_is_a_warning_in_kicad_mode():
+    board, sch = design()
+    board.tracks.append(TrackSegment(start=(1, 2), end=(3, 4), net="NET_A"))
+    board.footprints[0].pads[0].net_name = "NET_A"
+    board.footprints[0].pads[1].net_name = "NET_A"
+    guarded = plan_update_pcb_from_schematic(board, sch)
+    kicad = plan_update_pcb_from_schematic(board, sch, options=PcbUpdateOptions.kicad_dialog())
+    assert "copper_split" in {issue.code for issue in guarded.blockers}
+    assert "copper_split" not in {issue.code for issue in kicad.blockers}
+    assert "copper_split" in {issue.code for issue in kicad.issues}
 
 
 def test_locked_extra_footprint_retains_copper_net_demand():
@@ -1116,3 +1212,23 @@ def test_routed_extra_footprint_deletion_respects_contact_guard(preserve):
         result = apply_update_pcb_from_schematic(board, sch, plan)
         assert len(result.board.footprints) == 1
         assert result.board.tracks == board.tracks
+
+
+def test_refresh_of_selected_reference_keeps_a_bare_footprint_name():
+    board, sch = design()
+    sch.symbols[0].fields[2].value = "Package"
+    library = replacement()
+    library.fp_id = "Package"
+    options = PcbUpdateOptions(refresh_references=["U1"])
+    result = update_pcb_from_schematic(
+        board, sch, library_footprints={"Package": library}, options=options
+    )
+    assert result.board.footprints[0].fp_id == "Package"
+    assert "replace_footprint" in {change.kind for change in result.changes}
+
+
+def test_refresh_selection_leaves_other_references():
+    board, sch = design()
+    options = PcbUpdateOptions(refresh_references=["U9"])
+    plan = plan_update_pcb_from_schematic(board, sch, options=options)
+    assert "replace_footprint" not in {change.kind for change in plan.changes}

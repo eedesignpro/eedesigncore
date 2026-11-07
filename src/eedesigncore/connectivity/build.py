@@ -436,6 +436,10 @@ def build_subgraphs(
     """
     buckets = build_point_map(geo)
     adjacency = build_adjacency(buckets, geo)
+    for first, second in geo.jumper_links:
+        a, b = _Item(ItemKind.PIN, first), _Item(ItemKind.PIN, second)
+        adjacency.setdefault(a, set()).add(b)
+        adjacency.setdefault(b, set()).add(a)
 
     seen: set[_Item] = set()
     out: list[Subgraph] = []

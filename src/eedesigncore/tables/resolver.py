@@ -515,9 +515,11 @@ class LibTableResolver(KicadModel):
                 a local directory outside the roots, and read that directory,
                 which is the default. The global tables live in the user's own
                 settings directory, so a row in them is user configuration, the
-                same standing a ``kicad_common.json`` variable has. The project
-                tier is NOT widened, and a UNC path or a remote URI is still
-                refused on both tiers. ADR-047 amendment 4.
+                same standing a ``kicad_common.json`` variable has. The same
+                flag lets a direct GLOBAL ``KiCad`` row read its own local
+                library path (0.41.0). The project tier is NOT widened, and a
+                UNC path or a remote URI is still refused on both tiers.
+                ADR-047 amendment 4.
         """
         resolved_settings = (
             default_user_settings_dir(version=version, env=env)
@@ -587,11 +589,7 @@ class LibTableResolver(KicadModel):
         project_roots = self.roots("project")
         confined = [
             merged[name].model_copy(
-                update={
-                    "read_roots": (
-                        global_roots if merged[name].scope == "global" else project_roots
-                    )
-                }
+                update={"read_roots": self._row_roots(merged[name], global_roots, project_roots)}
             )
             for name in order
         ]
@@ -666,6 +664,40 @@ class LibTableResolver(KicadModel):
             *(self.allowed_roots or ()),
             *chain,
         ]
+
+    def _row_roots(
+        self,
+        library: ResolvedLibrary,
+        global_roots: list[Path],
+        project_roots: list[Path],
+    ) -> list[Path]:
+        """Return the read roots one resolved row carries.
+
+        A GLOBAL ``KiCad`` row with a local absolute path also gets its own
+        library path as a root, unless ``trust_table_chain`` is false. The row
+        is the user's own configuration, the same standing a nested global
+        table has (ADR-047 amendment 4), and KiCad reads it. Without this, a
+        global row naming ``C:/.../JLCPCB_Amplifier_Operational.kicad_symdir``
+        resolved and then read nothing: :func:`find_symbol` returned ``None``
+        for every symbol in 27 database libraries on the measuring machine.
+
+        Three cases keep the tier roots alone: a UNC path or a remote URI
+        (MEDIUM-1), a relative path, and a path that only a project text
+        variable produced, because a project must not name its own read root
+        (amendment 5). The project tier is never widened.
+        """
+        if library.scope != "global":
+            return project_roots
+        if not self.trust_table_chain or library.type != KICAD_ROW_TYPE:
+            return global_roots
+        if is_unc_path(library.uri) or has_uri_scheme(library.uri):
+            return global_roots
+        if not library.path.is_absolute():
+            return global_roots
+        without_project = self.environment.model_copy(update={"project_text_variables": {}})
+        if without_project.expand(library.raw_uri) != library.uri:
+            return global_roots
+        return [*global_roots, library.path]
 
     def _tiers(self) -> list[tuple[LibTableScope, Path]]:
         tiers: list[tuple[LibTableScope, Path]] = []

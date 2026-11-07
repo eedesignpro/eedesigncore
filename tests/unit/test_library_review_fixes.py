@@ -216,7 +216,10 @@ class TestConfinementTravelsWithTheRow:
             encoding="utf-8",
         )
         table = LibTableResolver.discover(
-            settings_dir=settings, kicad_root=tmp_path / "KiCad" / "10.0", env={}
+            settings_dir=settings,
+            kicad_root=tmp_path / "KiCad" / "10.0",
+            env={},
+            trust_table_chain=False,
         ).resolve("sym")
 
         assert table.libraries[0].read_roots is not None

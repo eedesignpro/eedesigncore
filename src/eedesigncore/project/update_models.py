@@ -25,6 +25,9 @@ class PcbUpdateOptions(KicadModel):
     update_references: bool = True
     update_values: bool = True
     refresh_footprints: bool = False
+    # Refresh only these references from the library, as KiCad's Update
+    # Footprints from Library does for a selection. refresh_footprints refreshes all.
+    refresh_references: list[str] = Field(default_factory=list)
     preserve_routed_contacts: bool = True
     # KiCad deletes a grouped footprint and takes it out of the group
     # (board_commit.cpp:352-373). False keeps the older blocker.

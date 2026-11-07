@@ -22,6 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from eedesigncore.common.pin_numbers import pad_numbers
 from eedesigncore.common.sch_family.ordering import resolve_symbol_definition
 from eedesigncore.common.sch_family.pins import Pin
 from eedesigncore.common.sch_family.symbol import Symbol
@@ -217,6 +218,10 @@ class SheetGeometry:
     sheet_pin_children: list[tuple[IUPoint, str, str]] = field(default_factory=list)
     # Names a directive label attaches, which never drive a net (audit 2 h5).
     directive_labels: list[tuple[IUPoint, str]] = field(default_factory=list)
+    # Pairs of indexes into ``pins`` that a symbol's jumper groups join, as a
+    # wire would (``CONNECTION_GRAPH::updateSymbolConnectivity``,
+    # connection_graph.cpp:1240-1296).
+    jumper_links: list[tuple[int, int]] = field(default_factory=list)
 
 
 def _symbol_field(placed: object, name: str) -> str:
@@ -305,6 +310,33 @@ def pin_sheet_position(
     negated = (pin_position[0], -pin_position[1])
     rotated = apply(transform, negated)
     return point_to_iu((rotated[0] + instance_position[0], rotated[1] + instance_position[1]))
+
+
+def _jumper_pairs(symbol: Symbol, pins: list[Pin]) -> list[tuple[int, int]]:
+    """Index pairs of the placed pins that the symbol's jumper groups join.
+
+    ``duplicate_pin_numbers_are_jumpers`` joins pins of one number. Each
+    ``jumper_pin_groups`` entry joins the pins it names; a member may name one
+    pad of a stacked pin such as ``[A1,A12]``.
+    """
+    groups: list[list[int]] = []
+    if symbol.duplicate_pin_numbers_are_jumpers:
+        by_number: dict[str, list[int]] = {}
+        for index, pin in enumerate(pins):
+            by_number.setdefault(pin.number, []).append(index)
+        groups.extend(by_number.values())
+    for group in symbol.jumper_pin_groups or []:
+        members: list[int] = []
+        for number in group:
+            found = next((i for i, pin in enumerate(pins) if pin.number == number), None)
+            if found is None:
+                found = next(
+                    (i for i, pin in enumerate(pins) if number in pad_numbers(pin.number)), None
+                )
+            if found is not None and found not in members:
+                members.append(found)
+        groups.append(members)
+    return [(a, b) for members in groups for i, a in enumerate(members) for b in members[i + 1 :]]
 
 
 def collect(
@@ -424,6 +456,10 @@ def collect(
                 == "no_connect",
             )
             for other in placed_pins
+        )
+        first = len(geo.pins)
+        geo.jumper_links.extend(
+            (first + a, first + b) for a, b in _jumper_pairs(symbol, placed_pins)
         )
         for pin_index, pin in enumerate(placed_pins):
             geo.pins.append(

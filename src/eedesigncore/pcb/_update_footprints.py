@@ -49,6 +49,9 @@ def replace_or_add(
                 )
     stable_ids(library, seed, reference)
     new = inject_footprint(board, library, at=placement.position, regenerate_uuids=False)
+    # The board keeps the identifier the schematic names, as KiCad does, even a
+    # bare name. inject_footprint would give a bare name a placeholder library.
+    new.fp_id = library.fp_id
     new.uuid = library.uuid
     if old is not None and old.layer == "B.Cu":
         flip_footprint(new, direction="top_bottom", board=board)

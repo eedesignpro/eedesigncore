@@ -17,6 +17,7 @@ from eedesigncore.project.netclass_patterns import NetclassPattern
 from eedesigncore.project.netclasses import _saved_patterns
 from eedesigncore.render.symbols import SymbolFont
 from eedesigncore.sch.models import Schematic
+from eedesigncore.sch.rule_areas import rule_area_scopes
 from eedesigncore.schematic_view.models import (
     SchematicCoverage,
     ViewItem,
@@ -31,7 +32,7 @@ from eedesigncore.text_resolution import (
 
 class SchematicClassEvidence(KicadModel):
     name: str
-    source: Literal["label", "bus_label", "project_pattern", "default"]
+    source: Literal["label", "bus_label", "rule_area", "project_pattern", "default"]
     item_id: str | None = None
     pattern: str | None = None
 
@@ -76,6 +77,9 @@ class SchematicElectricalPart(KicadModel):
     on_board: bool
     exclude_from_sim: bool
     variants_json: str
+    # The symbol's own Component Class field, plus the classes of the rule areas
+    # that hold it or one of its parent sheets (SCH_SYMBOL::GetComponentClassNames).
+    component_classes: list[str] = Field(default_factory=list)
 
 
 class SchematicElectricalSnapshot(KicadModel):
@@ -195,6 +199,9 @@ def inspect_schematic_electrical(
     parts: dict[str, SchematicElectricalPart] = {}
     class_issues: list[str] = []
     geometries: dict[str, str] = {}
+    sheet_classes: dict[str, set[str]] = {}
+    area_classes: dict[tuple[str, str | None], set[str]] = {}
+    part_paths: dict[str, tuple[str, str | None]] = {}
     for path, sheet in sheets:
         context = (
             context_for_sheet(source, path, context=text_context)
@@ -202,8 +209,16 @@ def inspect_schematic_electrical(
             else text_context or TextResolutionContext(instance_path=path)
         )
         resolved = resolved_sheets.get(path) or resolve_document_text(sheet, context).document
-        if sheet.rule_areas:
-            class_issues.append(f"Rule-area class attachment is not calculated: {path}")
+        scopes = rule_area_scopes(resolved) if resolved.rule_areas else []
+        on_area = {resolved.labels[index].uuid for scope in scopes for index in scope.directives}
+        for scope in scopes:
+            for index in scope.sheets:
+                child = path.rstrip("/") + "/" + (resolved.sheets[index].uuid or "")
+                sheet_classes.setdefault(child, set()).update(scope.component_classes)
+            for index in scope.symbols:
+                area_classes.setdefault((path, resolved.symbols[index].uuid), set()).update(
+                    scope.component_classes
+                )
         for symbol in resolved.symbols:
             item = lookup.get((path, symbol.uuid, "symbol"))
             if item is None:
@@ -223,6 +238,7 @@ def inspect_schematic_electrical(
                 exclude_from_sim=symbol.exclude_from_sim,
                 variants_json=_json([entry.model_dump(mode="json") for entry in symbol.instances]),
             )
+            part_paths[item.id] = (path, symbol.uuid)
         for label_index, label in enumerate(resolved.labels):
             item = lookup.get((path, label.uuid, "label"))
             class_fields = [
@@ -254,7 +270,8 @@ def inspect_schematic_electrical(
             )
             targets = set(item.net_ids)
             bus_targets = {net for bus in item.bus_ids for net in view.buses[bus].net_ids}
-            if class_fields and not targets and not bus_targets:
+            # A directive on a rule area border classes the area, not a net.
+            if class_fields and not targets and not bus_targets and label.uuid not in on_area:
                 class_issues.append(f"Class label has no resolved target: {item.id}")
             for name in class_fields:
                 if has_reference(name):
@@ -268,6 +285,50 @@ def inspect_schematic_electrical(
                             item_id=item.id,
                         )
                     )
+        # A rule area classes the nets of the wires, pins and labels inside it
+        # (CONNECTION_SUBGRAPH::GetNetclassesForDriver).
+        for scope in scopes:
+            if not scope.netclasses:
+                continue
+            directive = lookup.get((path, resolved.labels[scope.directives[0]].uuid, "label"))
+            targets_in: list[ViewItem] = []
+            for index in scope.labels:
+                found = lookup.get((path, resolved.labels[index].uuid, "label"))
+                if found is not None:
+                    targets_in.append(found)
+            for index in scope.lines:
+                line = resolved.lines[index]
+                found = lookup.get((path, line.uuid, line.line_type.value))
+                if found is None:
+                    class_issues.append(f"Rule-area wire without stable identity: {path}")
+                else:
+                    targets_in.append(found)
+            symbol_ids = {
+                found.id
+                for index in scope.symbols
+                if (found := lookup.get((path, resolved.symbols[index].uuid, "symbol")))
+            }
+            targets_in.extend(
+                pin
+                for pin in items.values()
+                if pin.kind == "pin"
+                and pin.parent_item in symbol_ids
+                and pin.position is not None
+                and scope.contains_point((float(pin.position[0]), float(pin.position[1])))
+            )
+            for target in targets_in:
+                for key in target.net_ids:
+                    for name in scope.netclasses:
+                        if has_reference(name):
+                            class_issues.append(f"Unresolved class text: {path}")
+                            continue
+                        nets[key].class_evidence.append(
+                            SchematicClassEvidence(
+                                name=name,
+                                source="rule_area",
+                                item_id=directive.id if directive else None,
+                            )
+                        )
         # Keep graphical differences separate from electrical facts.
         geometry = sheet.model_dump(mode="json")
         for symbol_data in geometry["symbols"]:
@@ -290,6 +351,13 @@ def inspect_schematic_electrical(
                 field.pop("value", None)
         geometry.pop("lib_symbols", None)
         geometries[path] = _json(geometry)
+    for part_id, (path, uuid) in part_paths.items():
+        part = parts[part_id]
+        classes = {part.fields.get("Component Class", "")} | area_classes.get((path, uuid), set())
+        for sheet_path, names in sheet_classes.items():
+            if path == sheet_path or path.startswith(sheet_path.rstrip("/") + "/"):
+                classes |= names
+        part.component_classes = sorted(classes - {""})
     project = source.project if isinstance(source, SheetHierarchy) else None
     patterns: list[tuple[NetclassPattern, str, str]] = []
     if project is None:

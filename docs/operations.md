@@ -807,7 +807,10 @@ for skip in table.skipped:
 A nested table row of the GLOBAL tier is followed even when it points outside
 the roots, and the folder holding it becomes readable for the libraries it
 names. The global tables are your own KiCad configuration, so a row in them is
-granted the same standing as a path variable. A PROJECT table is not widened,
+granted the same standing as a path variable. A direct global row of a local
+absolute path, such as a parts library folder, is readable for the same reason.
+Only the row's own path opens, and a path from a project text variable does not.
+A PROJECT table is not widened,
 because a project is often a repository you did not write, and a UNC path or a
 URL scheme is refused on both tiers. `trust_table_chain=False` refuses such
 rows. Each refused row is then recorded in `skipped`.

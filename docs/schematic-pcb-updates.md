@@ -113,6 +113,7 @@ All controls belong to `PcbUpdateOptions`.
 | `match_by_reference` | `False` | Match full symbol paths. When enabled, match references without case sensitivity and update associations. |
 | `replace_footprints` | `True` | Replace the geometry when the assigned footprint identifier changes. |
 | `refresh_footprints` | `False` | Replace geometry even when the footprint identifier stays the same. |
+| `refresh_references` | `[]` | Refresh only these references, as KiCad's Update Footprints from Library does for a selection. |
 | `delete_extra_footprints` | `False` | Delete unmatched footprints, subject to lock, group, and routed-contact checks. |
 | `override_locks` | `False` | Permit replacement or deletion of locked footprints. |
 | `update_fields` | `True` | Copy schematic fields other than Reference, Value, Footprint, and Component Class. |
@@ -122,7 +123,7 @@ All controls belong to `PcbUpdateOptions`.
 | `update_attributes` | `True` | Copy do-not-populate, bill-of-materials exclusion, and position-file exclusion. |
 | `update_references` | `True` | Copy the schematic reference. |
 | `update_values` | `True` | Copy the schematic value. |
-| `preserve_routed_contacts` | `True` | Block changed or deleted pads on nets that contain copper. |
+| `preserve_routed_contacts` | `True` | Block changed or deleted pads, and split copper nets, on nets that contain copper. |
 | `delete_grouped_footprints` | `False` | Delete an unmatched footprint that is a board group member, and remove it from the group. |
 | `skip_blocked_parts` | `False` | Report a part that cannot be replaced or added, keep its old footprint, and apply the rest. |
 
@@ -201,6 +202,8 @@ Repeated-sheet groups and conflicting multi-unit group membership block transfer
 
 A uniform copper-net rename updates the existing copper through the established net-renaming operation.
 Splitting an existing copper net, or removing its assignment, requires physical copper connectivity and blocks the update.
+With `preserve_routed_contacts=False`, as in `kicad_dialog()`, a split is a warning: the pads take their schematic nets by pad number and the copper keeps its old net, as in KiCad.
+A pad compares by position to one nanometre and by angle as a direction, so 270 and -90 degrees agree.
 The helper does not route, refill zones, or repair dangling tracks.
 Disabling `preserve_routed_contacts` permits changed contacts with a warning. It does not repair routing.
 
@@ -256,11 +259,22 @@ A default net name uses the first listed pad, as `SCH_PIN::GetEffectivePadNumber
 The reverse update reads every listed pad. Listed pads on different board nets need a pin change and block, like any other split.
 Invalid notation, such as `[3-1]`, names one pad with the same text, as in KiCad.
 
+## Rule areas and jumper pins
+
+A schematic rule area applies the directive labels on its border, as KiCad 10 does.
+A wire, pin, or net label inside takes the area's net classes.
+A symbol whose bounding box touches the area, and every symbol under a sheet that touches it, takes the area's component classes.
+The footprint component classes are the symbol's own Component Class field plus these.
+
+Pins in one jumper group, or pins of one number when duplicate pin numbers are jumpers, join one net, as a wire would.
+Their pads take that net.
+
+A replaced footprint keeps the identifier the schematic names, even a bare name.
+
 ## Shared limits
 
 - Saved occurrence units that differ from the placed unit require occurrence-specific geometry and currently block both directions.
 - Assembly variants require explicit variant selection and currently block both directions.
-- Rule-area population and component-class inheritance currently block both directions.
 - Incomplete electrical coverage blocks requested net changes.
 - Direct power naming changes require a separate explicit power-symbol update.
 - Arbitrary pin permutations, native wire cleanup, and copper-island reconstruction are not implemented.

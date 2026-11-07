@@ -29,7 +29,8 @@ Class evidence names the attached label, bus label, matching project pattern, or
 The operation ignores stale saved `netclass_assignments` and combines current schematic attachments with matching project patterns.
 Undefined class names remain in the result. The operation does not invent class definitions or apply interface policy.
 Use the append-only helper below for explicitly chosen global-label memberships.
-Rule-area class attachment is not yet implemented and makes class coverage partial.
+A rule area attaches the net classes of the directives on its border to the nets of the wires, pins, and labels inside. Its evidence source is `rule_area`.
+Each part lists `component_classes`: its own Component Class field plus the classes of the rule areas that hold it or a parent sheet.
 Missing project patterns, unresolved class text, and unresolved target membership also prevent complete class coverage.
 
 ## Comparison

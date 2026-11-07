@@ -82,6 +82,17 @@ def _pin_type(
     return base + "+no_connect" if len(members) <= 1 or stacked else base
 
 
+def _same_point(a: tuple[float, float], b: tuple[float, float]) -> bool:
+    """True when two points agree to one nanometre, KiCad's internal unit."""
+    return abs(a[0] - b[0]) < 1e-6 and abs(a[1] - b[1]) < 1e-6
+
+
+def _same_angle(a: float, b: float) -> bool:
+    """True when two angles name the same direction: 270 and -90 agree."""
+    turn = (a - b) % 360.0
+    return min(turn, 360.0 - turn) < 1e-9
+
+
 def _same_units(first: FootprintUnitInfo, second: FootprintUnitInfo) -> bool:
     return len(first.units) == len(second.units) and all(
         a.name == b.name and Counter(a.pins) == Counter(b.pins)
@@ -226,6 +237,7 @@ def _run(
             and old is not None
             and (
                 options.refresh_footprints
+                or reference in options.refresh_references
                 or (options.replace_footprints and not _same_footprint(old.fp_id, desired))
             )
         )
@@ -282,10 +294,10 @@ def _run(
                     matches = [new for new in fp.pads if new.id == pad.id and pad.id]
                     changed_contact = (
                         not matches
-                        or matches[0].position != pad.position
+                        or not _same_point(matches[0].position, pad.position)
                         or matches[0].layers != pad.layers
                         or matches[0].size != pad.size
-                        or matches[0].angle != pad.angle
+                        or not _same_angle(matches[0].angle, pad.angle)
                         or matches[0].shape != pad.shape
                         or matches[0].primitives != pad.primitives
                         or matches[0].padstack != pad.padstack
@@ -323,9 +335,9 @@ def _run(
         # recorded order. Keep the board's order when the pin sets agree.
         if fp.unit_info and previous_units and _same_units(previous_units, fp.unit_info):
             fp.unit_info = previous_units
-        classes = sorted(
-            {inspection.parts[key].fields.get("Component Class", "") for key in ids} - {""}
-        )
+        # The netlist component classes: each unit's field and rule-area classes
+        # (netlist_exporter_xml.cpp:816-866).
+        classes = sorted({name for key in ids for name in inspection.parts[key].component_classes})
         fp.component_classes = ComponentClasses(classes=classes) if classes else None
         if options.update_references:
             set_field(fp.properties, "Reference", reference, layer="F.SilkS")
@@ -570,6 +582,8 @@ def _run(
                 "A copper net would split or lose its assignment. "
                 "Physical connectivity must resolve this change.",
                 old_name,
+                # KiCad applies the pad nets and leaves the copper to DRC.
+                warning=not options.preserve_routed_contacts,
             )
         else:
             mapping[old_name] = next(iter(names))
