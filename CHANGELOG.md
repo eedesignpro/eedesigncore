@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.1] - 2026-11-09
+
+- `inject_symbol`: when the sheet cache holds a different definition under the same library ID, the placed symbol keeps its library ID and names the renamed cache entry in `lib_name`, as KiCad 10 does. Before, the library ID lost its nickname, and an update from the library could not find the part.
+
 ## [0.46.0] - 2026-11-08
 
 - `create_subsheet` writes the sheet instance data: project name, parent KIID path and page number. KiCad 10 no longer repairs page numbers on load. Breaking: the call needs `hierarchy=`, or `project_name`, `parent_path` and `page`.

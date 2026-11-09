@@ -144,7 +144,7 @@ def test_inject_collision_rename_with_placeholder_default() -> None:
     # first def registered under "eedesigncore:R"; the differing def collides and
     # renames to the bare "<ItemName>_1" (§5.2, empty nickname), NOT "Lib:R_1"
     assert sch.lib_symbols[0].name == "eedesigncore:R"
-    assert placed2.lib_id == "R_1"
+    assert (placed2.lib_id, placed2.lib_name) == ("eedesigncore:R", "R_1")
 
 
 def test_inject_synthesizes_pins_with_uuids() -> None:
@@ -221,8 +221,12 @@ def test_inject_differing_def_renamed() -> None:
     differing.in_bom = False  # body differs from the cached def
     placed2 = inject_symbol(sch, differing, at=(5.0, 5.0), lib_nickname="Device")
     # collision-rename to bare "<ItemName>_1" (empty nickname), §5.2
-    assert placed2.lib_id == "R_1"
+    assert (placed2.lib_id, placed2.lib_name) == ("Device:R", "R_1")
     assert {s.name for s in sch.lib_symbols} == {"Device:R", "R_1"}
+    first = sch.symbols[0]
+    assert (first.lib_id, first.lib_name) == ("Device:R", None)
+    reloaded = Schematic.from_string(sch.to_string()).symbols[1]
+    assert (reloaded.lib_id, reloaded.lib_name) == ("Device:R", "R_1")
 
 
 def test_inject_differing_def_twice_reuses_renamed_entry() -> None:
@@ -233,7 +237,7 @@ def test_inject_differing_def_twice_reuses_renamed_entry() -> None:
     inject_symbol(sch, diff.model_copy(deep=True), at=(1.0, 1.0), lib_nickname="Device")
     placed3 = inject_symbol(sch, diff.model_copy(deep=True), at=(2.0, 2.0), lib_nickname="Device")
     # second differing inject matches the already-renamed R_1: reuse, no R_2
-    assert placed3.lib_id == "R_1"
+    assert (placed3.lib_id, placed3.lib_name) == ("Device:R", "R_1")
     assert {s.name for s in sch.lib_symbols} == {"Device:R", "R_1"}
 
 
@@ -246,7 +250,7 @@ def test_inject_two_distinct_differing_defs_increment_suffix() -> None:
     d2 = _simple_symbol()
     d2.on_board = False  # a third, distinct body
     placed3 = inject_symbol(sch, d2, at=(2.0, 2.0), lib_nickname="Device")
-    assert placed3.lib_id == "R_2"
+    assert (placed3.lib_id, placed3.lib_name) == ("Device:R", "R_2")
     assert {s.name for s in sch.lib_symbols} == {"Device:R", "R_1", "R_2"}
 
 

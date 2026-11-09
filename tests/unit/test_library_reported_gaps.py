@@ -121,8 +121,8 @@ class TestGapAUnitNamePrefix:
         differing.fields.append(Property(name="Extra", value="x", visible=False))
         placed = inject_symbol(sch, differing, at=(20.0, 20.0), lib_nickname="Lib")
 
-        registered = next(entry for entry in sch.lib_symbols if entry.name == placed.lib_id)
-        assert placed.lib_id == "RESISTOR_1"
+        registered = next(entry for entry in sch.lib_symbols if entry.name == placed.lib_name)
+        assert (placed.lib_id, placed.lib_name) == ("Lib:RESISTOR", "RESISTOR_1")
         assert [unit.name for unit in registered.units] == ["RESISTOR_1_1_0"]
 
 

@@ -311,6 +311,8 @@ def inject_symbol(
       ADR-041 amendment 1, ADR-047).
     - Steps 2/5 REWRAP + REGISTER: register the def in ``sch.lib_symbols`` keyed by
       the full lib_id, with collision-rename (§5.2, ``sch_screen.cpp:179-263``).
+      After a rename the placed symbol keeps ``lib_id`` and names the renamed
+      cache entry in ``lib_name``, so an update from the library still finds it.
     - Step 3 SYNTHESIZE the placed ``(symbol …)`` node (§5.1): ``lib_id`` (the
       resolved key), ``at``/``rotation``, ``unit``/``body_style``, the five bools
       copied from the def, a fresh instance ``(uuid)`` + per-pin uuids
@@ -384,8 +386,11 @@ def inject_symbol(
     if project_name is None:
         project_name = next((p.name for s in sch.symbols for p in s.instances if p.name), "")
 
+    # A collision keeps the library link and names the renamed cache entry in
+    # lib_name, as SCH_SCREEN::Append does (SetSchSymbolLibraryName).
     placed = PlacedSymbol(
-        lib_id=resolved_key,
+        lib_name=resolved_key if resolved_key != incoming.name else None,
+        lib_id=incoming.name,
         position=at,
         angle=rotation,
         unit=unit,
