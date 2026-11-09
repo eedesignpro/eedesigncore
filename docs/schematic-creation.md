@@ -118,9 +118,20 @@ Use [schematic tables](schematic-tables.md) to create tables that fit their text
 
 ## Child page content
 
-`create_subsheet(title, filename, at=...)` returns a `CreatedSubsheet` with `sheet` and `schematic` members.
+`create_subsheet(title, filename, at=..., hierarchy=...)` returns a `CreatedSubsheet` with `sheet` and `schematic` members.
 Append `sheet` to the parent schematic. Save `schematic` at the relative filename through the existing native save operations.
-The operation does not write files, overwrite a child file, assign page numbers, or insert a reference into the parent.
+The operation does not write files, overwrite a child file, or insert a reference into the parent.
+
+The sheet carries the instance data KiCad writes: the project name, the KIID path of the parent sheet, and the page number.
+Without it, KiCad 10 gives each sheet a page on load and reports a repaired schematic.
+Give the place in one of two ways:
+
+- `hierarchy=load_hierarchy(project)`, and `parent=` the node of the file that holds the sheet (default: the root).
+  Each instance of that file gets an entry, with the next free page number (`next_page_number`: the highest numeric page plus one).
+  `page=` sets the first page; `project_name=` overrides the project file name.
+- `project_name=`, `parent_path=` and `page=`, all three, for one entry. The root path is `"/<root uuid>"`.
+
+With neither, the call raises `ValueError`.
 It uses the sheet size, title-width fitting, and border defaults described above.
 
 The new child contains a Git information block and a three-row table for branch, date, and commit. This package ships that layout in the template file sch/templates/child_sheet.kicad_sch.

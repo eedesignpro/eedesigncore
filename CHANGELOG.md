@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.46.0] - 2026-11-08
+
+- `create_subsheet` writes the sheet instance data: project name, parent KIID path and page number. KiCad 10 no longer repairs page numbers on load. Breaking: the call needs `hierarchy=`, or `project_name`, `parent_path` and `page`.
+- With `hierarchy`, each instance of the parent file gets an entry with the next free page number.
+- Add `next_page_number`: the highest numeric page of a hierarchy plus one.
+
 ## [0.45.0] - 2026-11-07
 
 Read KiCad HTTP libraries, as KiCad 10 does (operator ruling 2026-11-07: eedesigncore connects to an HTTP library server itself).

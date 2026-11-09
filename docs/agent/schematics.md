@@ -168,6 +168,8 @@ template.
 - `create_subsheet` and `create_sheet_schematic` seed a new child page: landscape
   B paper, a title that shows the sheet name, and a GIT INFO table with branch,
   date, and commit rows. The package ships that layout as a template file.
+  `create_subsheet` needs `hierarchy=` or `project_name`, `parent_path` and
+  `page`; it writes the sheet page number.
   KiCad resolves the variables in the table, not this library.
   `CreatedSubsheet` holds the result.
 - `create_note_block`, `create_schematic_note`, `create_layout_note`, and

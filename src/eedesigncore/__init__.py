@@ -452,7 +452,12 @@ from eedesigncore.sch.notes import (
     parse_schematic_notes,
     update_note_block,
 )
-from eedesigncore.sch.subsheets import CreatedSubsheet, create_sheet_schematic, create_subsheet
+from eedesigncore.sch.subsheets import (
+    CreatedSubsheet,
+    create_sheet_schematic,
+    create_subsheet,
+    next_page_number,
+)
 from eedesigncore.sch.tables import create_schematic_table, fit_schematic_table
 from eedesigncore.sch.update_from_pcb import (
     apply_update_schematic_from_pcb,
@@ -1011,7 +1016,7 @@ __all__ += [
     "update_note_block",
 ]
 
-__all__ += ["CreatedSubsheet", "create_sheet_schematic", "create_subsheet"]
+__all__ += ["CreatedSubsheet", "create_sheet_schematic", "create_subsheet", "next_page_number"]
 
 __all__ += [
     "CHANGE_CATEGORIES",

@@ -118,7 +118,7 @@ Field and return aliases are supported.
 | Netbom, `docs/netbom.md` | `build_netbom`, `load_netbom`, `NetbomDocument`, `NetbomRecord`, `NetbomEvidence`, `NetbomCoverage`, `NetbomSourceManifest`, `NetbomSourceFile` |
 | Design inspection, `docs/design-inspection.md` | `DesignInspector`, `inspect_design`, `open_inspection`, `portable_inspection_source` |
 | Netbom assemblies, `docs/netbom-assemblies.md` | `NetbomAssembly`, `AssemblyInspector`, `AssemblyEvidence`, `ConnectorEndpoint`, `ConnectorMate`, `ConnectorMateDefinition`, `ConnectorPinPair` |
-| Schematic creation, `docs/schematic-creation.md`, `docs/field-autoplacement.md`, `docs/global-label-geometry.md` | `create_global_label`, `create_hierarchical_label`, `create_sheet`, `add_sheet_pin`, `create_subsheet`, `CreatedSubsheet`, `create_sheet_schematic`, `autoplace_fields`, `global_label_outline` |
+| Schematic creation, `docs/schematic-creation.md`, `docs/field-autoplacement.md`, `docs/global-label-geometry.md` | `create_global_label`, `create_hierarchical_label`, `create_sheet`, `add_sheet_pin`, `create_subsheet`, `next_page_number`, `CreatedSubsheet`, `create_sheet_schematic`, `autoplace_fields`, `global_label_outline` |
 | Schematic tables, `docs/schematic-tables.md` | `create_schematic_table`, `fit_schematic_table` |
 | Schematic notes, `docs/schematic-notes.md` | `create_note_block`, `create_schematic_note`, `create_layout_note`, `create_todo_note`, `parse_note_block`, `parse_schematic_notes`, `update_note_block`, `NoteKind`, `SchematicNote` |
 | Schematic measurement, `docs/schematic-measurements.md` | `measure_schematic`, `measure_schematic_item`, `find_schematic_overlaps`, `SchematicMeasurement`, `SchematicPartBounds`, `SchematicCollision`, `MeasuredSchematicItem` |
@@ -137,7 +137,7 @@ An `HTTP` row is read from its server
 (`docs/operations.md § Read an HTTP library`).
 
 A `Database` row needs rows a caller supplies. `load_kicad_dbl` reports the
-driver, tables, and columns that a `.kicad_dbl` file names. Your code connects,
+driver, tables, and columns a `.kicad_dbl` file names. Your code connects,
 runs the query, and passes the rows in. **It never connects to a database,
 writes SQL, or holds its credential.** A password becomes `<withheld>`. See
 `docs/operations.md § Finding a part`.
